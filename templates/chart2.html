@@ -1,0 +1,60 @@
+<h4>Peaks vs RNA class</h4>
+<div class="chart-container"><canvas id="myChart2" width="600" height="600"></canvas></div>
+<div class="chart-legend" id="legend2"></div>
+<script type="text/javascript">
+
+
+var nums = numbers_here;
+var lbls = labels_here;
+var ctx = document.getElementById("myChart2");
+var myDoughnutChart2 = new Chart(ctx, {
+    type: 'doughnut',
+    data : {
+      datasets: [{
+          data: nums,
+          backgroundColor: [
+            "#36c", "#dc3912", "#66aa00", "#f90", "#316395", "#b82e2e", "#990099", "#128419", "#18add8", "#d47", "#818312", "#291283", "#831227", "#22adad", "#ad9522", "#ad7c22"
+          ]
+      }],
+
+
+      // These labels appear in the legend and in the tooltips when hovering different arcs
+      labels: lbls,
+    },
+    options: {
+      responsive: true,
+      pieceLabel: {
+        render: 'percentage',
+        fontColor: '#fff',
+        precision: 2
+      },
+      legend: {display: false},
+      // title: {
+      //   display: true,
+      //   fontSize: 18,
+      //   fontFamily: "'Rubik', sans-serif",
+      //   fontStyle: 'bold',
+      //   fontColor: '#444',
+      //   text: 'Samples per data source'
+      //
+      // },
+      animation: {
+        animateScale: true,
+        animateRotate: true
+      },
+      elements: {
+        center: {
+          text: sum_here,
+          color: '#666', //Default black
+          fontStyle: 'Roboto', //Default Arial
+          sidePadding: 30
+        }
+      }
+
+    }
+});
+
+// var legend = myDoughnutChart2.generateLegend().replace(/\"0-legend"/g, 'legend');
+// $("#legend2").append(legend);
+
+</script>

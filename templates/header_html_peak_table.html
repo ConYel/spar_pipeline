@@ -1,0 +1,18 @@
+<head>
+<style>
+a>div { display : none; }
+a:hover>div { display : block; }
+
+
+</style>
+
+<link rel="stylesheet" href="../../../style.css" type="text/css" media="all">
+</head>
+
+<div id="loading">Loading data...please wait.</div>
+<div id="divDownloadTable" style="display:none">
+<a href="" id="downloadTableLink" download="table.xls" onclick="d=tf.getFilteredData(1); s=d.join('\n'); s=s.replace(/,/g,'\t'); this.href='data:text/plain;charset=utf-8,'+encodeURIComponent(s)">Download Table</a>
+</div>
+<div id="divColsVisibility" style="display:none">
+</div>
+<div id="page_nav"></div>

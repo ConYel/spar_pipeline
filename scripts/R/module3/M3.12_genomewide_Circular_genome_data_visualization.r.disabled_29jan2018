@@ -1,0 +1,150 @@
+genomewide_Circular_genome_data_visualization<- function(fprefix='input',wdir=".") {
+
+start_time <- proc.time()
+cat("Circos plot visualization (M3.12) start:", date(), '\n')
+# Plots for Module 3 Analysis and visualization of SPAR output 
+# Session: Genomewide characteristics  
+
+# Module_3_Figure_12 (Figure 3.12) 
+# description of figure: Visualization the expression patterns of all loci in a circular genome 
+# input: input_annot.with_conservation.xls, input.unannot.final.with_conservation.xls
+# output: Circular_genome_data_visualization.png / Circular_genome_data_visualization.pdf
+
+# parameters for the plot 
+datafile1=paste(wdir, "/", fprefix, "_annot.with_conservation.xls", sep="")
+datafile2=paste(wdir, "/", fprefix, "_unannot.with_conservation.xls", sep="")
+BASENAME="Circular_genome_data_visualization"
+PLOTTITLE="Circular genomewide visualization for all loci"
+XTITLE=""
+YTITLE=""
+
+options(stringsAsFactors = FALSE);
+options(device = 'x11')
+
+# libraries needed 
+suppressPackageStartupMessages(library(reshape2))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(plyr))
+suppressPackageStartupMessages(library(RColorBrewer))
+suppressPackageStartupMessages(library(OmicCircos))
+suppressPackageStartupMessages(library(dplyr))
+
+#args<-commandArgs(TRUE)
+#datafile1=args[1] # input file 1
+#datafile2=args[2] # input file 2
+#wdir=args[3] # output / working directory
+#if (length(args)<1) { stop("ERROR: No input! USAGE: script inputfile <output-dir>")}
+#if (length(args)<2) { stop("ERROR: No input! USAGE: script inputfile <output-dir>")}
+#if (length(args)<3) { wdir="." } 
+#use current dir if no 
+#working dir has been specified
+
+# output image file
+pngfile= paste(wdir, "/../figures/", paste(BASENAME,".png",sep=""), sep="")
+#pdffile= paste(wdir, "/", paste(BASENAME,".pdf",sep=""), sep="")
+
+## input hg19 cytogenetic band data
+data(UCSC.hg19.chr);
+
+# Read in data
+D = read.table(datafile1,sep='\t',header=T,comment.ch="")
+E = read.table(datafile2,sep='\t',header=T,comment.ch="")
+E$annotChr = "NA"
+E$annotChrStart = 0
+E$annotChrEnd = 0
+E$annotID = "NA"
+E$annotRNAclass = "unannot"
+E$annotStrand = "+"
+E$annotOverlap = 0
+E$peakOverlap = 0
+E = E[,c(1:20,24:31,21:23)]
+DE = rbind(D,E) 
+
+
+## splitting up the annotation IDs 
+names_D= strsplit(as.character(D$annotID),':')
+names_D = data.frame(matrix(unlist(names_D), ncol=5, byrow=T))[,5]
+names_D = data.frame(names_D)
+names_E = data.frame(paste(E$peakChrStart,"-",E$peakChrEnd,"_",E$peakStrand))
+colnames(names_D) = "gene"
+colnames(names_E) = "gene"
+names = rbind(names_D,names_E)
+DE = cbind(DE,names)  
+DE = data.frame(DE)
+DE$peakIDstrand = paste(DE$peakID,DE$peakStrand)  
+
+ZN = dcast(DE,peakIDstrand~annotRNAclass, value.var="peakRPM",fun.aggregate=sum)
+
+ZN[,dim(ZN)[2]+1]=rowSums(ZN[,c(2:5)])
+colnames(ZN)[dim(ZN)[2]]="miRNA"
+ZN[,dim(ZN)[2]+1]=rowSums(ZN[,c(9:10)])
+colnames(ZN)[dim(ZN)[2]]="snoRNAall"
+# ZN = ZN[,c(1,14,9,10,13,6)]
+ZN = ZN[,c("peakIDstrand", "miRNA","snoRNAall","snRNA","tRNA","piRNA","unannot")]
+
+ZN_DE_comb = left_join(ZN, DE, by = c('peakIDstrand' = 'peakIDstrand'))
+
+ZN_DE_filter = subset(ZN_DE_comb,annotRNAclass != "rRNA")
+ZN_DE_filter = subset(ZN_DE_filter, annotRNAclass != "scRNA")
+ZN_DE_filter = subset(ZN_DE_filter, annotRNAclass != "tRF3")
+ZN_DE_filter = subset(ZN_DE_filter, annotRNAclass != "tRF5")
+
+
+Z_data = ZN_DE_filter[,c(2:7)]
+Z_data = log10(Z_data)
+Z_data = do.call(data.frame,lapply(Z_data, function(x) replace(x, is.infinite(x),0)))
+# Z_data = (Z_data-min(Z_data))/(max(Z_data)-min(Z_data))
+# Z_data[is.na(Z_data)] <- 0
+# Z_data = Z_data-min(Z_data)+0.1
+
+Zchr <- lapply(ZN_DE_filter$X.peakChr, function(x) {gsub("chr", "", x)})
+Zchr = as.character(Zchr)
+Zpos = ZN_DE_filter$peakChrStart
+Zgene = ZN_DE_filter$gene
+DN = cbind(Zchr,Zpos,Zgene,Z_data) 
+
+
+colnames(DN) = c("chr","po","Gene","miRNA","snoRNA","snRNA","tRNA","piRNA","unannot")
+
+cat("DN:\n")
+print(head(DN))
+
+## ploting top 30 sncRNA per category
+X1 = DN[order(DN$miRNA,decreasing=TRUE)[1:20],]
+X2 = DN[order(DN$snoRNA,decreasing=TRUE)[1:20],]
+X3 = DN[order(DN$snRNA,decreasing=TRUE)[1:20],]
+X4 = DN[order(DN$tRNA,decreasing=TRUE)[1:20],]
+X5 = DN[order(DN$piRNA,decreasing=TRUE)[1:20],]
+X6 = DN[order(DN$unannot,decreasing=TRUE)[1:20],]
+
+# X is the list of the top 120 records (highest expression values) 
+X = rbind(X1,X2,X3,X4,X5,X6)
+
+type.n  <-  as.factor(colnames(DN)[-c(1:3)])
+colors  <-  colorRampPalette(brewer.pal(6,"Set1"))(length(type.n))
+plotgenes = X[,c(1:3)]
+
+
+## specifying the parameters for legend 
+png(pngfile,width = 9, height = 9, units = 'in', res = 300, type="cairo")
+plot(c(1,1650), c(1,1650), type="n", axes=FALSE, xlab="", ylab="", main="")
+legend(1350,1650, c("miRNA","snoRNA","snRNA","tRNA","piRNA","unannot"),pch=19, col=colors, cex=0.6, title ="sncRNA classes", box.col="white")
+title(c(PLOTTITLE),line=-0.25)
+
+## plotting the real circos
+circos_start <- proc.time()
+circos(xc=780, yc=780, R=480, type="chr", cir="hg19", W=0);
+circos(xc=780, yc=780, R=560, cir="hg19", W=30, mapping=plotgenes,type="label", side="out", col="black", cex=0.45);
+circos(xc=780, yc=780, R=460, cir="hg19", W=70, mapping=DN[DN[,4]!=0,c(1,2,4)],type="s", B=FALSE, col=colors[1], lwd=0.5,  scale=TRUE, cex=0.10);
+circos(xc=780, yc=780, R=390, cir="hg19", W=70, mapping=DN[DN[,5]!=0,c(1,2,5)],type="s", B=TRUE, col=colors[2], lwd=0.5,  scale=TRUE, cex=0.10);
+circos(xc=780, yc=780, R=320, cir="hg19", W=70, mapping=DN[DN[,6]!=0,c(1,2,6)],type="s", B=FALSE, col=colors[3], lwd=0.5,  scale=TRUE, cex=0.10);
+circos(xc=780, yc=780, R=240, cir="hg19", W=70, mapping=DN[DN[,7]!=0,c(1,2,7)],type="s", B=TRUE, col=colors[4], lwd=0.5,  scale=TRUE, cex=0.10);
+circos(xc=780, yc=780, R=180, cir="hg19", W=70, mapping=DN[DN[,8]!=0,c(1,2,8)],type="s", B=FALSE, col=colors[5], lwd=0.5,  scale=TRUE, cex=0.10);
+circos(xc=780, yc=780, R=110, cir="hg19", W=70, mapping=DN[DN[,9]!=0,c(1,2,9)],type="s", B=TRUE, col=colors[6], lwd=0.5,  scale=TRUE, cex=0.10);
+cat("Time for circos plot itself:", (proc.time() - circos_start)[['elapsed']], "seconds\n")
+dev.off()
+
+cat("Time for circos plot (M3.12) analysis:", (proc.time() - start_time)[['elapsed']], "seconds (", date(), ")\n")
+}
+
+# genomewide_Circular_genome_data_visualization(fprefix=fprefix,wdir=wdir)

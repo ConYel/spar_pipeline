@@ -1,0 +1,83 @@
+<script src="../../../tablefilter/tablefilter.js"></script>
+
+<script data-config>
+//var numEntriesPerPage=10;
+var tfConfig = {
+    base_path: '../../../tablefilter/',
+    sort: true,
+    target_id: 'page_nav',
+    //help_instructions: true,
+    paging: true,
+    results_per_page: ['Results per page', [10, 25, 50, 100]],
+    results_per_page_target_id: 'page_nav',
+    //paging: {
+     //length: 25,
+    //}, 
+    help_instructions: { text: 'Use the filters in each column to filter and limit data. Advanced searches can be performed by using the following operators: <, <=, >, >=, =, *, !, {, }, ||,&&, [empty], [nonempty], rgx', html: 'User filters in each column to filter and limit data.' },
+    paging_length: 25,
+    //paging_target_id : 'page_nav',
+    paging_target_id : 'inf_peakTable',
+    mark_active_columns : true,
+    filters_row_index:1,
+    alternate_rows: true,
+    rows_counter: true,
+    rows_counter_text: 'Loci: ',
+    btn_reset: true,
+    btn_reset_text: "Clear",
+    loader: true,
+    no_results_message: true,
+    auto_filter : true, // filter as user types
+    auto_filter_delay : 1800, // filtering delay in millisecondss
+    col_0: "select", // chr
+    col_5: "select", // strand
+    //col_20: "multiple", // class
+    col_24: "checklist", // class
+    //col_8: "checklist", // tissue
+    col_31: "checklist", // mRNA?
+    col_38: "checklist", // lncRNA?
+    col_46: "checklist", // repeat?
+    // columns data types
+    //col_number_format: [
+    //    null,null,'US','US',null,'US',null,null,null,'US','US','US','US','US',null],
+    //col_number_format: [
+   //     null,'US','US',null,'US',null,null,null,'US','US','US','US','US','US','US','US',null,null,null,null,null,null,null,'US',null,null,null,'US','US',null,'US',null,null,null,'US','US',null,'US','US',null,null,null,'US','US',null,'US'],
+    col_number_format: [ null,'US','US',null,'US',null,'US','US','US','US','US','US','US','US','US','US','US','US','US','US',null,'US','US',null,null,null,'US','US','US','US','US',null,null,null,'US','US',null,'US',null,null,null,'US','US',null,'US','US',null,null,null,'US','US',null,'US'],
+    col_types: [ 'string','number','number','string','number','string','number','number','number','number','number','number','number','number','number','number','number','number','number','number','string','number','number','string','string','string','number','number','number','number','number','string','string','string','number','number','string','number','string','string','string','number','number','string','number','number','string','string','string','number','number','string','number'],
+   // col_types: [ 'string','number','number','string','number','string','number','number','number','number','number','number','number','number','number','number','number','number','number','number','string','number','number','string','string','string','number','number','number','number','number'],
+    //col_types:[
+    //    'string','string','number','number','string','number','string','string','string','number','number','number','number','number','number','number','number','string','string','string','string','string','string','string','number'],
+    //col_date_type: [
+    //    null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+    //],
+
+    // Sort extension: in this example the column data types are provided by the
+    // 'col_number_format' and 'col_date_type' properties. The sort extension
+    // also has a 'types' property defining the columns data type. If the
+    // 'types' property is not defined, the sorting extension will check for
+    // 'col_number_format' and 'col_date_type' properties.
+    //extensions: [{ name: 'sort' }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'ldiv_peakTable' }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'divColsVisibility' }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'page_nav' }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'page_nav', enable_tick_all : true, tick_to_hide : false }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'page_nav', enable_tick_all : true, tick_to_hide : false, at_start : [8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 21, 22, 23] }] // at_start : list of INVISIBLE columns at the start!
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'page_nav', enable_tick_all : true, tick_to_hide : false, at_start : [3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 21, 22, 23] }] // at_start : list of INVISIBLE columns at the start!
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'rdiv_peakTable', enable_tick_all : true, tick_to_hide : false, at_start : [3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 21, 22, 23] }] // at_start : list of INVISIBLE columns at the start (0-based)!
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'rdiv_peakTable', enable_tick_all : false, tick_to_hide : false, at_start : [1,2,3,4,9,11,13,14,15,21,22,23] }]
+    //extensions: [{ name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'rdiv_peakTable', enable_tick_all : false, tick_to_hide : false, at_start : [1,2,3,4,9,11,13,14,15,21,22,23] }]
+    extensions: [ { name: 'sort' }, { name : 'colsVisibility', btn_target_id : 'rdiv_peakTable', enable_tick_all : false, tick_to_hide : false, at_start : [1,2,6,7,8,9,10,11,13,14,15,16,17,20,21,22,25,26,27,29,30,32,33,34,35,36,37,39,40,41,42,43,44,45,47,48,49,50,51,52,53] }]
+};
+var tf = new TableFilter('peakTable', tfConfig);
+tf.init();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('divDownloadTable').style.display = 'block';
+    document.getElementById('peakTable').style.display = 'block';
+    document.getElementById('divColsVisibility').style.display = 'block';
+
+   window.onclick = function(event) {
+         if (document.getElementById('colVis_Cont_peakTable').style.display == 'inline' && (event.target.tagName == 'TD' || event.target.tagName == 'DIV')) {
+          document.getElementById('colVis_Cont_peakTable').style.display = 'none';
+         }
+    }
+
+</script>

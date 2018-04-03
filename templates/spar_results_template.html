@@ -1,0 +1,124 @@
+<!--<link href="../smdb-tab2.css" rel="stylesheet" type="text/css">-->
+<style>
+table, th, td {
+   border: 1px solid black;
+   padding: 3px;
+   border-collapse: collapse;
+}
+
+
+
+th {
+    background-color: #4B585C; /*blue;*/
+    color: white;
+}
+</style>
+
+<table border="1">
+<tr>
+<th width="20%">Content
+<th width="40%">Description
+<th width="40%">Download
+
+<tr>
+<td>
+Peak tracks
+<td>
+Genome-wide tracks
+<td>
+<ul>
+<li>
+plus strand [<a href="${PEAKTRACKPLUS}">bigBED</a>] [ ${sizePEAKTRACKPLUS} ]
+<li>
+minus strand [<a href="${PEAKTRACKMINUS}">bigBED</a>] [ ${sizePEAKTRACKMINUS} ]
+</ul>
+</td>
+
+<tr>
+<td>
+Raw signal tracks
+<td>
+Genome-wide tracks
+<td>
+<ul>
+<li>
+plus strand [<a href="${RAWPLUS}">bigWig</a>] [ ${sizeRAWPLUS} ]
+<li>
+minus strand [<a href="${RAWMINUS}">bigWig</a>] [ ${sizeRAWMINUS} ]
+</ul>
+</td>
+
+<tr>
+<td>
+Peak tables 
+<td>
+Tables with detailed information:
+<ol>
+<li>
+Annotated peaks: peaks overlapping sncRNA genes or mature products with annotations. 
+<li>
+Unannotated peaks: peaks that do not overlap with annotated
+sncRNA genes or mature products.
+</ol>
+<td>
+<ul>
+<li>
+Annotated peaks [<a href="${PEAKTABLEANNOT}">xls</a>]
+<li>
+Unannotated peaks [<a href="${PEAKTABLEUNANNOT}">xls</a>]
+<li>
+All called peaks [<a href="${PEAKTABLEALL}">xls</a>] [<a href="${PEAKBEDALL}">bed</a>]
+</ul>
+</td>
+
+<tr>
+<td>
+Gene expression
+<td>
+Small RNA gene expression
+<td>
+<ul>
+<!--<li>
+Coverage at DASHR annotation level (i.e. 48000 rows) 
+-->
+<li>
+Gene expression table (<a href="${GENEEXPRTABLE}">xls</a>) [ ${sizeGENEEXPRTABLE} ]
+</ul>
+</td>
+
+<tr>
+<td>
+Comparison with DASHR
+<td>
+Integrated expression tables
+<td>
+<ul>
+<li>
+Annotated peaks [<a href="${DASHRCOMPANNOT}">xls</a>]
+<li>
+Unannotated peaks [<a href="${DASHRCOMPUNANNOT}">xls</a>]
+<li>
+All (Annotated + Unannotated) peaks [<a href="${DASHRCOMPALL}">xls</a>] [bed]
+<li>
+Peaks not in DASHR [<a href="${NOTINDASHR}">xls</a>]
+</ul>
+</td>
+
+<tr>
+<td>
+Comparison with ENCODE
+<td>
+Integrated expression tables
+<td>
+<ul>
+<li>
+Annotated peaks [<a href="${ENCODECOMPANNOT}">xls</a>]
+<li>
+Unannotated peaks [<a href="${ENCODECOMPUNANNOT}">xls</a>]
+<li>
+All (Annotated + Unannotated) peaks [<a href="${ENCODECOMPALL}">xls</a>] [bed]
+<li>
+Peaks not in ENCODE [<a href="${NOTINENCODE}">xls</a>]
+</ul>
+</td>
+</table>

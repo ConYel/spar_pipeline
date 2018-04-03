@@ -1,0 +1,301 @@
+## Genomewide_distribution_patterns_of_small_RNA_loci.r
+## alex amlie-wolf
+## computes genomic partition of all SPAR-called loci (annot and unannot)
+
+genomewide_Genomewide_distribution_patterns_of_small_RNA_loci <- function(fprefix='input',wdir=".",partition_ref_path="./partition_files/") {
+    start_time <- proc.time()
+    cat("Genomic partition analysis (M3.11) start", date(), '\n')
+    
+    BASENAME="Genomewide_distribution_patterns_of_small_RNA_loci"
+    PLOTTITLE="Genomic partitioning of all loci\nacross sncRNA classes"
+    XTITLE="Genomic_Element"
+    YTITLE="Count"
+
+    suppressPackageStartupMessages(library(ggplot2))
+    suppressPackageStartupMessages(library(RColorBrewer))
+    suppressPackageStartupMessages(library(parallel))
+    
+    ## output image file
+    pngfile= paste(wdir, "/../figures/", paste(BASENAME,".png",sep=""), sep="")
+#    pdffile= paste(wdir, "/", paste(BASENAME,".pdf",sep=""), sep="")
+
+    load(paste0(wdir, "/", BASENAME, "_partition_props_byclass.Rdata"))
+
+    partition_order <- c("5' UTR Exon", "5' UTR Intron", "3' UTR Exon", "3' UTR Intron",
+                         "Promoter", "mRNA Exon", "mRNA Intron", "Repeat", "Intergenic")    
+    
+    png(pngfile, width = 7, height = 7, units = 'in', res = 300, type="cairo")
+    print(ggplot(full_class_prop_tab, aes(x=class, y=Proportion, fill=factor(Genomic_Element, levels=partition_order))) +
+          xlab("sncRNA Class") + ylab("Genomic Partition Proportions") +
+          theme_bw() + geom_bar(stat="identity", position="stack") +
+          scale_fill_manual(values=setNames(brewer.pal(n=9, name="Paired"), partition_order), name=XTITLE) +
+          theme(legend.position="bottom", axis.text.x=element_text(angle=45, hjust=1)) +
+          guides(fill=guide_legend(nrow=3, byrow=TRUE)) + 
+          ggtitle(paste("Genomic Proportions of annotated and unannotated loci")) #, BASENAME))
+          )
+    dev.off()
+    
+    # ggsave(paste0(wdir, "/", BASENAME, "_partition_byclass.png"), class_barplots, dpi=600, type="cairo-png")
+    # ggsave(paste0(wdir, "/", BASENAME, "_partition_byclass.pdf"), class_barplots, dpi=600)
+    cat("Total time for genomic partition (M3.11) analysis:", (proc.time() - start_time)[['elapsed']], "seconds (", date(), ")\n")
+}
+
+# genomewide_Genomewide_distribution_patterns_of_small_RNA_loci(fprefix=fprefix,wdir=wdir, partition_ref_path=partition_ref_path)
+
+## OLD CODE:
+
+    ## ## hard code the bedtools path
+    ## bedtools_path <- "/home/pkuksa/bin/bedtools-2.26/bedtools2/bin/bedtools"
+
+##     ## generate bed file (use peak strand)
+##     ## annotated data
+##     annot_locus_data <- read.table(annot_datafile, header=T, sep="\t", quote="", as.is=T,
+##                                    comment.char="", strip.white=T)
+##     ## define an index for the extra columns we want to paste
+##     annot_locus_col_idx <- which(!(colnames(annot_locus_data) %in% c("X.peakChr", "peakChrStart", "peakChrEnd", "peakStrand", "annotRNAclass")))
+
+##     ## write the full bed file
+##     write.table(data.frame(annot_locus_data$X.peakChr, annot_locus_data$peakChrStart, annot_locus_data$peakChrEnd,
+##                            gsub("\\s*", "",
+##                                 apply(cbind(annot_locus_data$annotRNAclass, annot_locus_data[,annot_locus_col_idx]), 1, paste, collapse=",")),
+##                            "0", annot_locus_data$peakStrand),
+##                 paste0(wdir, "/", BASENAME, "_annot.bed"), quote=F, sep="\t",
+##                 row.names=F, col.names=F)
+##     orig_colnames <- colnames(annot_locus_data)
+## #    rm(annot_locus_data)
+
+##     ## unannotated data
+##     unannot_locus_data <- read.table(unannot_datafile, header=T, sep="\t", quote="", as.is=T,
+##                                    comment.char="", strip.white=T)
+##     ## define an index for the extra columns we want to paste
+##     unannot_locus_col_idx <- which(!(colnames(unannot_locus_data) %in% c("X.peakChr", "peakChrStart", "peakChrEnd", "peakStrand")))
+
+##     ## write the full bed file
+##     write.table(data.frame(unannot_locus_data$X.peakChr, unannot_locus_data$peakChrStart, unannot_locus_data$peakChrEnd,
+##                            gsub("\\s*", "",
+##                                 apply(unannot_locus_data[,unannot_locus_col_idx],
+##                                       1, paste, collapse=",")),
+##                            "0", unannot_locus_data$peakStrand),
+##                 paste0(wdir, "/", BASENAME, "_unannot.bed"), quote=F, sep="\t",
+##                 row.names=F, col.names=F)
+##     orig_colnames <- colnames(unannot_locus_data)
+## #    rm(unannot_locus_data)   
+        
+##     ## compute overlaps using bedtools
+##     annot_partition_call <- paste(bedtools_path, "intersect -s -sorted -a",
+##                                   paste0(wdir, "/", BASENAME, "_annot.bed"), "-b",
+##                                   paste0(partition_ref_path, "/all_annotations_both_strand_with_names.bed"),
+##                                   "-wao -f 0.51 > ", paste0(wdir, '/', BASENAME, '_annot_overlaps.txt'))
+    
+##     unannot_partition_call <- paste(bedtools_path, "intersect -s -sorted -a",
+##                                     paste0(wdir, "/", BASENAME, "_unannot.bed"), "-b",
+##                                     paste0(partition_ref_path, "/all_annotations_both_strand_with_names.bed"),
+##                                     "-wao -f 0.51 > ", paste0(wdir, '/', BASENAME, '_unannot_overlaps.txt'))
+
+    
+##     ## store to variable so it doesn't print out 
+##     ## partition_res <- parLapply(clust, c(annot_pos_partition_call, annot_neg_partition_call,
+##     ##                                     unannot_pos_partition_call, unannot_neg_partition_call),
+##     ##                            function(x) { system(x) } )
+##     bedtools_time <- proc.time()
+##     system(annot_partition_call)
+##     system(unannot_partition_call)
+## #    cat("Bedtools time:"(proc.time() - bedtools_time)[['elapsed']],'seconds\n')
+    
+
+## combined strand analysis but without 50% filter
+    ## ## compute overlaps using bedtools
+    ## annot_partition_call <- paste(bedtools_path, "intersect -s -sorted -a",
+    ##                               paste0(wdir, "/", BASENAME, "_annot.bed"), "-b",
+    ##                               paste0(partition_ref_path, "/all_annotations_both_strand_with_names.bed"),
+    ##                               "-wao > ", paste0(wdir, '/', BASENAME, '_annot_overlaps.txt'))
+
+    
+    ## unannot_partition_call <- paste(bedtools_path, "intersect -s -sorted -a",
+    ##                                 paste0(wdir, "/", BASENAME, "_unannot.bed"), "-b",
+    ##                                 paste0(partition_ref_path, "/all_annotations_both_strand_with_names.bed"),
+    ##                                 "-wao > ", paste0(wdir, '/', BASENAME, '_unannot_overlaps.txt'))
+
+    ## ddply_time <- proc.time()
+    ## full_partition_assignments <- ddply(full_partition_data, .(V1, V2, V3, V4, V5, V6, class), function(x) {
+    ##     if(nrow(x)==1) {
+    ##         if(x$V10==".") {
+    ##             return(cbind(x, partition="Intergenic", overlap_id="Intergenic"))
+    ##         } else {
+    ##             annot_split <- regmatches(x$V10, regexpr(";", x$V10), invert=T)
+    ##             partition_raw <- annot_split[[1]][1]
+    ##             if(partition_raw=="5utr_exon") {
+    ##                 partition_out <- "5' UTR Exon" }
+    ##             else if(partition_raw=="5utr_intron") {
+    ##                 partition_out <- "5' UTR Intron" }
+    ##             else if(partition_raw=="3utr_exon") {
+    ##                 partition_out <- "3' UTR Exon" }
+    ##             else if(partition_raw=="3utr_intron") {
+    ##                 partition_out <- "3' UTR Intron" }
+    ##             else if(partition_raw=="promoter") {
+    ##                 partition_out <- "Promoter" }
+    ##             else if(partition_raw=="exon") {
+    ##                 partition_out <- "mRNA Exon" }
+    ##             else if(partition_raw=="intron") {
+    ##                 partition_out <- "mRNA Intron" }
+    ##             else {
+    ##                 partition_out <- "Repeat" }
+    ##             return(cbind(x, partition=partition_out,
+    ##                          overlap_id=annot_split[[1]][2]))
+    ##         }
+    ##     } else {
+    ##         ## in this case, we have to parse the class hierarchy
+    ##         annot_split <- regmatches(x$V10, regexpr(";", x$V10), invert=T)
+    ##         annot_classes <- unlist(lapply(annot_split, '[', 1))
+    ##         annot_ids <- unlist(lapply(annot_split, '[', 2))            
+    ##         ## do the hierarchical class assignment            
+    ##         fp_utr_exon_hits <- which(annot_classes=="5utr_exon")
+    ##         if(length(fp_utr_exon_hits) > 0) {
+    ##             return(cbind(x, partition="5' UTR Exon",
+    ##                          overlap_id=paste(annot_ids[fp_utr_exon_hits], collapse=";"))) }            
+    ##         fp_utr_intron_hits <- which(annot_classes=="5utr_intron")
+    ##         if(length(fp_utr_intron_hits) > 0) {
+    ##             return(cbind(x, partition="5' UTR Intron",
+    ##                          overlap_id=paste(annot_ids[fp_utr_intron_hits], collapse=";"))) }            
+    ##         tp_utr_exon_hits <- which(annot_classes=="3utr_exon")
+    ##         if(length(tp_utr_exon_hits) > 0) {
+    ##             return(cbind(x, partition="3' UTR Exon",
+    ##                          overlap_id=paste(annot_ids[tp_utr_exon_hits], collapse=";"))) }
+    ##         tp_utr_intron_hits <- which(annot_classes=="3utr_intron")
+    ##         if(length(tp_utr_intron_hits) > 0) {
+    ##             return(cbind(x, partition="3' UTR Intron",
+    ##                          overlap_id=paste(annot_ids[tp_utr_intron_hits], collapse=";"))) }
+    ##         promoter_hits <- which(annot_classes=="promoter")
+    ##         if(length(promoter_hits) > 0) {
+    ##             return(cbind(x, partition="Promoter",
+    ##                          overlap_id=paste(annot_ids[promoter_hits], collapse=";"))) }
+    ##         exon_hits <- which(annot_classes=="exon")
+    ##         if(length(exon_hits) > 0) {
+    ##             return(cbind(x, partition="mRNA Exon",
+    ##                          overlap_id=paste(annot_ids[exon_hits], collapse=";"))) }
+    ##         intron_hits <- which(annot_classes=="intron")
+    ##         if(length(intron_hits) > 0) {
+    ##             return(cbind(x, partition="mRNA Intron",
+    ##                          overlap_id=paste(annot_ids[intron_hits], collapse=";"))) }
+    ##         repeat_hits <- which(annot_classes=="repeat")
+    ##         if(length(repeat_hits) > 0) {
+    ##             return(cbind(x, partition="Repeat",
+    ##                          overlap_id=paste(annot_ids[repeat_hits], collapse=";"))) }            
+    ##     }
+    ## })
+    ## cat("ddply time\n")
+    ## proc.time() - ddply_time
+    
+
+
+## for split strand analysis
+    ## ## call the overlap computation script on each strand
+    ## ## assumes that the python script is in this folder
+    ## annot_pos_partition_call <- paste("/usr/local/bin/python", paste0(partition_ref_path, "/compute_genomic_element_overlap.py"),
+    ##              paste0(partition_ref_path, "/parsed_pos_5utr_exons.merged.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e_5utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i_3utr_exons.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e_3utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3i_promoters.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ip_exons.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ipe_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ipei_repeats.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_annot_pos.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_annot_pos_partition.txt"))
+    
+    ## annot_neg_partition_call <- paste("/usr/local/bin/python", paste0(partition_ref_path, "/compute_genomic_element_overlap.py"),
+    ##              paste0(partition_ref_path, "/parsed_neg_5utr_exons.merged.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e_5utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i_3utr_exons.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e_3utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3i_promoters.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ip_exons.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ipe_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ipei_repeats.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_annot_neg.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_annot_neg_partition.txt"))
+
+    ## unannot_pos_partition_call <- paste("/usr/local/bin/python", paste0(partition_ref_path, "/compute_genomic_element_overlap.py"),
+    ##              paste0(partition_ref_path, "/parsed_pos_5utr_exons.merged.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e_5utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i_3utr_exons.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e_3utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3i_promoters.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ip_exons.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ipe_introns.bed"), 
+    ##              paste0(partition_ref_path, "/pos_n5e5i3e3ipei_repeats.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot_pos.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot_pos_partition.txt"))
+    
+    ## unannot_neg_partition_call <- paste("/usr/local/bin/python", paste0(partition_ref_path, "/compute_genomic_element_overlap.py"),
+    ##              paste0(partition_ref_path, "/parsed_neg_5utr_exons.merged.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e_5utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i_3utr_exons.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e_3utr_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3i_promoters.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ip_exons.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ipe_introns.bed"), 
+    ##              paste0(partition_ref_path, "/neg_n5e5i3e3ipei_repeats.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot_neg.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot_neg_partition.txt"))
+
+    ## OLD partition assignment code
+    ## full_partition_data$partition <- ifelse(full_partition_data$fp_utr_exon_bp > 0, "5' UTR Exon",
+    ##                                  ifelse(full_partition_data$fp_utr_intron_bp > 0, "5' UTR Intron",
+    ##                                  ifelse(full_partition_data$tp_utr_exon_bp > 0, "3' UTR Exon",
+    ##                                  ifelse(full_partition_data$tp_utr_intron_bp > 0, "3' UTR Intron",
+    ##                                  ifelse(full_partition_data$promoter_bp > 0, "Promoter",
+    ##                                  ifelse(full_partition_data$exon_bp > 0, "mRNA Exon",
+    ##                                  ifelse(full_partition_data$intron_bp > 0, "mRNA Intron",
+    ##                                  ifelse(full_partition_data$repeat_bp > 0, "Repeat",
+    ##                                  "Intergenic"))))))))
+
+                                     ## we used to keep the weird chromosome names
+                                     ## ## here we check if it's a canonical chromosome
+                                     ## ifelse(grepl("chr[0-9XY]{1,2}$", full_partition_data$chr), "Intergenic",
+                                     ## ## if not, we just give it the chromosome name
+                                     ##        full_partition_data$chr)))))))))
+
+    ## ## sort these bed files
+    ## ## TODO: SKIP THIS STEP
+    ## system(paste("sort -k1,1 -k2,2n", paste0(wdir, "/", BASENAME, "_annot.bed"),
+    ##              ">", paste0(wdir, "/", BASENAME, "_annot_sorted.bed"))) 
+    ## system(paste("sort -k1,1 -k2,2n", paste0(wdir, "/", BASENAME, "_unannot.bed"),
+    ##              ">", paste0(wdir, "/", BASENAME, "_unannot_sorted.bed"))) 
+
+    ## ## split by strand, write to files
+    ## split_res <- parLapply(clust,
+    ##                        c(paste("awk '{if ($6==\"+\") print $0}'",
+    ##                                paste0(wdir, "/", BASENAME, "_annot_sorted.bed"),
+    ##                                ">", paste0(wdir, "/", BASENAME, "_annot_pos.bed")),
+    ##                          paste("awk '{if ($6==\"-\") print $0}'",
+    ##                                paste0(wdir, "/", BASENAME, "_annot_sorted.bed"),
+    ##                                ">", paste0(wdir, "/", BASENAME, "_annot_neg.bed")),
+    ##                          paste("awk '{if ($6==\"+\") print $0}'",
+    ##                                paste0(wdir, "/", BASENAME, "_unannot_sorted.bed"),
+    ##                                ">", paste0(wdir, "/", BASENAME, "_unannot_pos.bed")),
+    ##                          paste("awk '{if ($6==\"-\") print $0}'",
+    ##                                paste0(wdir, "/", BASENAME, "_unannot_sorted.bed"),
+    ##                                ">", paste0(wdir, "/", BASENAME, "_unannot_neg.bed"))),
+    ##                        function(x) {system(x)})
+
+    ## code for outputting a single file with all the assignments across annot and unannot
+    ## ## remove other files
+    ## system(paste("rm", paste0(wdir, "/", BASENAME, "_annot_sorted.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot_sorted.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_annot.bed"),
+    ##              paste0(wdir, "/", BASENAME, "_unannot.bed")))
+
+    ## ## we want to add partition and overlap ID columns to the original input data, and we also combine the
+    ## ## annotated and unannotated data
+    ## ## make a new header
+    ## system(paste("head -1", annot_datafile, "| sed -e 's/$/\tgenomicPartition\toverlapIds/' > ", paste0(wdir, "/", BASENAME, "_genomic_partition.txt")))
+    ## ## now we combine the annotated and unannotated data, in the same order as the partition output
+    ## sort_string <- paste0("paste <(tail -n +2 -q ", annot_datafile, " ", unannot_datafile, " | sort -k1,1 -k2,2n -k3,3n -k6,6) <(tail -n +2 ",
+    ##                       paste0(wdir, "/", BASENAME, "_allclass_partition_assignment.txt"),
+    ##                       " | sort -k1,1 -k2,2n -k3,3n -k6,6 | cut -f", class_col, ",", id_col, " )")
+    ## system(paste0("echo '", sort_string, "' > ", wdir, "/", BASENAME, "_temp_f.sh"))
+    ## system(paste0("bash ", wdir, "/", BASENAME, "_temp_f.sh", " >> ", wdir, "/", BASENAME, "_genomic_partition.txt"))
+    
+    ## ## write this table out
+    ## write.table(full_partition_data, paste0(wdir, "/", BASENAME, "_allclass_partition_assignment.txt"), quote=F, sep="\t", row.names=F, col.names=T)
