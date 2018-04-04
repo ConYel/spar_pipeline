@@ -21,6 +21,17 @@ else
   exit 1
 fi
 
+# check prerequisites
+PREREQS="${STAR} ${SAMTOOLS} ${BEDTOOLS} ${BGTOBIGWIG} ${BEDTOBIGBED} ${BIGWIGTOBEDGRAPH} ${BIGWIGAVGOVERBED} ${CUTADAPT}"
+
+for prereq in $PREREQS; do
+  if [ ! -x "${prereq}" ]; then
+    echo "${prereq} not found";
+    exit 1
+  fi
+done
+
+
 genomeBuild=${GENOMEBUILD:-"hg19"}
 conservationTrack=${CONSERVATIONTRACK}
 doConservation=1 #${doConservation:-1}

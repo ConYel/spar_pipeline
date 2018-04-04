@@ -33,6 +33,7 @@ SPAR is available for academic and nonprofit use for free ([MIT license](LICENSE
 4. UCSC tools (bedGraphToBigWig, bigWigToBedGraph, bedToBigBed, bigWigAverageOverBed)
 4. R >=3.2.3 and R libraries (parallel, ggplot2, dplyr, plyr, reshape2, RColorBrewer)
 5. STAR >=2.4
+6. Cutadapt >=1.9
 
 ## Installation
 
@@ -137,6 +138,14 @@ Samtools
 apt-get install samtools
 ```
 
+Cutadapt
+```
+pip install --user --upgrade cutadapt
+```
+or install from source
+```
+https://github.com/marcelm/cutadapt
+```
 
 ## Recompiling bam2bedgraph binary (if necessary)
 
