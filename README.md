@@ -44,7 +44,7 @@ export STAR="${BINDIR}/STAR_2.4.0j/bin/Linux_x86_64/STAR" # STAR
 export genomeDir="${HOMEDIR}/datasets/${GENOMEBUILD}/star/"  # STAR genome index
 export GENOMEFA="${HOMEDIR}/datasets/${GENOMEBUILD}/${GENOMEBUILD}.fa"
 
-#absolute path to pre-installed STAR, samtools, AWK, etc
+#absolute path to pre-installed bedtools, samtools, AWK, etc
 export SAMTOOLS="${BINDIR}/samtools-1.2/samtools"
 export BEDTOOLS="${BINDIR}/bedtools-2.26/bedtools2/bin/bedtools"
 
@@ -55,7 +55,7 @@ export BEDTOBIGBED="${BINDIR}/bedToBigBed"
 # Adapter trimming
 export CUTADAPT="${BINDIR}/cutadapt-1.8.1/bin/cutadapt"
 
-#mapping parameters for STAR
+# Analysis parameters for STAR
 export maxMismatchCnt=0 # maximum number of genomic mismatches
 export maxMapCnt=100 # maximum number of places a read can map to
 export minMappedLength=14 # minimum *mapped* length
@@ -79,10 +79,31 @@ wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph
 wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOverBed
 ```
 
+Conservation tracks
+
+
+Human genome (GRCh37/hg19):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/phastCons100way/hg19.100way.phastCons.bw
+```
+
+Human genome (GRCh38/hg38):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phastCons100way/hg38.phastCons100way.bw
+```
+
+Mouse genome (GRCm38/mm10):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/mm10/phastCons60way/mm10.60way.phastCons.bw
+```
+
+Please set CONSERVATIONTRACK in the SPAR config file to the absolute path of the conservation bigWig track file.
+
 Samtools
 ```
 apt-get install samtools
 ```
+
 
 
 ## Recompiling bam2bedgraph binary (if necessary)
