@@ -1,6 +1,6 @@
 # SPAR config file
 
-export HOMEDIR=/project/wang/pkuksa 
+export HOMEDIR="${HOME}" 
 
 #absolute path to the bin directory
 export BINDIR="${HOMEDIR}/bin"
@@ -12,7 +12,7 @@ export SPARDIR="${HOMEDIR}/SPAR_out"
 export GENOMEBUILD=mm10
 
 # data directory for SPAR (DASHR/ENCODE data, etc)
-export SPARDATAPATH=/project/wang/pkuksa/datasets/SPAR_data
+export SPARDATAPATH=${HOME}/SPAR_data
 
 #absolute path to the STAR genome index
 export STAR="${BINDIR}/STAR_2.4.0h/bin/Linux_x86_64/STAR" # STAR
