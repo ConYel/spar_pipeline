@@ -1,9 +1,23 @@
 # SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments
 
+Analysis, annotation, visualization of small RNA sequencing experiments
+
+Fast turn-around analyses for small RNA-seq, microRNA-seq, single-cell small RNA, and short total RNA sequencing data, as well as comparison of user-given sequencing data to reference data from DASHR normal human tissues/cell types and human ENCODE cell lines
+
+* Ab initio (annotation-free) small non-coding RNA (sncRNA) discovery and characterization
+* Expression comparison of user data with >180 reference human tissues, cell types and cell lines from DASHR and ENCODE
+* Annotations for GRCh37/hg19, GRCh38/hg38, mm10
+
+### Supported inputs and protocols:
+* Small RNA-sequencing, microRNA-seq, short total RNA sequencing protocols
+* Mapped reads (BAM), raw signal tracks (BigWig), and sequencing reads (FASTQ)
+* Genome-wide or user-provided target region analysis
 
 
 This repository contains SPAR pipeline scripts.
 Provided *SPAR.sh* script automates processing, analysis, visualization of small RNA-seq data in mapped (BAM), genome-wide read coverage (bigWig), and *trimmed* sequencing reads (FASTQ) formats ( bigWig/BAM/trimmmed FASTQ files can be prepared using SPAR preprocessing scripts  [SPAR](https://www.lisanwanglab.org/SPAR)).
+
+
 
 ## Citation
 "SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments". Pavel P. Kuksa, Alexandre Amlie-Wolf, Zivadin Katanic, Otto Valladares, Li-San Wang, Yuk Yee Leung.
