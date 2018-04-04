@@ -1,7 +1,25 @@
 # SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments
 
+
+
 This repository contains SPAR pipeline scripts.
 Provided *SPAR.sh* script automates processing, analysis, visualization of small RNA-seq data in mapped (BAM), genome-wide read coverage (bigWig), and *trimmed* sequencing reads (FASTQ) formats ( bigWig/BAM/trimmmed FASTQ files can be prepared using SPAR preprocessing scripts  [SPAR](https://www.lisanwanglab.org/SPAR)).
+
+## Citation
+"SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments". Pavel P. Kuksa, Alexandre Amlie-Wolf, Zivadin Katanic, Otto Valladares, Li-San Wang, Yuk Yee Leung.
+
+## License
+SPAR is available for academic and nonprofit use for free ([MIT license](LICENSE.md)).
+
+## Prerequisites
+
+1. Linux/Mac
+2. Samtools >=1.2
+3. Bedtools >=2.26
+4. UCSC tools (bedGraphToBigWig, bigWigToBedGraph, bedToBigBed, bigWigAverageOverBed)
+4. R >=3.2.3 and R libraries (parallel, ggplot2, dplyr, plyr, reshape2, RColorBrewer)
+5. STAR >=2.4
+
 
 ## Preparing reference genome (FASTA):
 
