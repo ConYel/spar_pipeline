@@ -16,7 +16,6 @@ ls ${submoduleDir}/*M*.r | \
        if (plotCategory != plotCategory_prev)
          print "<h3>"plotCategory"</h3>";
 
-       #imgURL = ("http://tesla.pcbi.upenn.edu/~pkuksa/SPAR/" imgDIR "/" plotname ".png")
        imgURL = ("https://www.lisanwanglab.org/SPAR/" imgDIR "/" plotname ".png")
 
        imgTitle = imgURL;

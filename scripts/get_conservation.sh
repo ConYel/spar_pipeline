@@ -1,5 +1,4 @@
 set -e
-#~/bin/userApps/bin/bigWigAverageOverBed /mnt/data/users/pkuksa/datasets/hg19/hg19.100way.phastCons.bw unannot.bed6 out.tab.tmp -bedOut=out.bed -minMax
 # the out.bed will be original bed + mean/min/max/ columns
 
 #http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw
@@ -7,13 +6,12 @@ set -e
 INTABLE=$1 # input table in BED-like format
 
 CONSERVATIONTRACK=$2 # genome-wide conservation bigWig track
-#CONSERVATIONTRACK=/mnt/data/users/pkuksa/datasets/hg19/hg19.100way.phastCons.bw
 
 # NOTE: this is modified and re-compiled version of bigWigAverageOverBed
 # main change: use bigWig fetch for each line instead of per-chromosome method
 # the per-chromosome method is *slow* as it essentially constructs chromosome-sized vector from bigWig data
 # the default behavior was to use fetching if the number of BED intervals was greater than 3000 and chromosome method otherwise
-#BIGWIGAVGOVERBED=/home/pkuksa/bin/userApps/bin/bigWigAverageOverBed
+#BIGWIGAVGOVERBED=bin/userApps/bin/bigWigAverageOverBed
 
 if [ $# -lt 2 ]; then
   echo "USAGE: $0 <table.bed> <conservation.bigWig>"

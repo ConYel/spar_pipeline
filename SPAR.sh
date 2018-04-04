@@ -912,11 +912,7 @@ SKIP_MODULE1
   printT "Creating plots"
   printL "Running R scripts for plotting"
   printL "RSCRIPT=${RSCRIPT}\n${outRscript}\n${submoduleDir}\n"
-  rcmd="/home/pkuksa/bin/R-3.2.3/bin/Rscript ${outRscript} 2>&1"
-  rcmd="${RSCRIPT} ${outRscript} 2>&1"
   rcmd="${RSCRIPT} ${outRscript} >> ${RLOG}"
-  rcmdPar="/home/pkuksa/bin/R-3.2.3/bin/Rscript ${outRscriptPar} 2>&1"
-  rcmdPar="${RSCRIPT} ${outRscriptPar} 2>&1"
   rcmdPar="${RSCRIPT} ${outRscriptPar} >> ${RLOG}"
   cat "${SPARPATH}/scripts/debug_header" > ${OUTDIR}/make_plots.sh
   echo "${rcmd}" >> ${OUTDIR}/make_plots.sh

@@ -4,15 +4,6 @@
 ## alex amlie-wolf
 ## overlaps SPAR intervals with repeat annotations
 
-# added 31 jan 2018
-# replace default
-# /usr/local/bin/bedtools
-# with
-# faster version
-# ~/bin/bedtools-2.26/bedtools2/bin/bedtools
-#BEDTOOLS=/home/pkuksa/bin/bedtools-2.26/bedtools2/bin/bedtools
-
-
 
 if [ $# == 3 ]; then
     WDIR=$1

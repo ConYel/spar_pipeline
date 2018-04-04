@@ -1,4 +1,3 @@
-#awk 'NR%4==2' SPAR-master/testdata/adipose1_SRR772426_trimmed.fastq | sort -S2G | uniq -c | awk '{id=("read_" NR "_x" $1); read=$2; print ">"id; print read;}' > tmp.collapsed
 
 # collapse FASTQ file to FASTA with unique reads and their counts
 INFASTQ=$1
@@ -24,4 +23,3 @@ awk '{
            }
         }' ${INFASTQ} 
 
-#time awk '{if (NR%4==2) ++read[$1]}END{for (r in read) { ++cnt; id=("read_" cnt "_x" read[r]); print ">"id"\n"r}}' /data/users/pkuksa/datasets/DASHR/DASHR_1.0_trimmed_fastq/merged/adipose_merged_trimmed.fastq  > /data/users/pkuksa/datasets/tmp.collapsed2
