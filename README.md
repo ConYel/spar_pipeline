@@ -34,6 +34,7 @@ SPAR is available for academic and nonprofit use for free ([MIT license](LICENSE
 4. R >=3.2.3 and R libraries (parallel, ggplot2, dplyr, plyr, reshape2, RColorBrewer)
 5. STAR >=2.4
 
+## Installation
 
 ## Preparing reference genome (FASTA):
 
@@ -54,6 +55,26 @@ mkdir -p hg19/star
 
 STAR --runMode genomeGenerate --genomeDir hg19/star --genomeFastaFiles hg19.fa --runThreadN 4
 ```
+
+## Preparing conservation tracks
+
+Human genome (GRCh37/hg19):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/phastCons100way/hg19.100way.phastCons.bw
+```
+
+Human genome (GRCh38/hg38):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phastCons100way/hg38.phastCons100way.bw
+```
+
+Mouse genome (GRCm38/mm10):
+```
+wget http://hgdownload.cse.ucsc.edu/goldenpath/mm10/phastCons60way/mm10.60way.phastCons.bw
+```
+
+Please set CONSERVATIONTRACK in the SPAR config file to the absolute path of the conservation bigWig track file.
+
 
 ## Setting up configuration file
 
@@ -111,31 +132,10 @@ wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph
 wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigAverageOverBed
 ```
 
-Conservation tracks
-
-
-Human genome (GRCh37/hg19):
-```
-wget http://hgdownload.cse.ucsc.edu/goldenpath/hg19/phastCons100way/hg19.100way.phastCons.bw
-```
-
-Human genome (GRCh38/hg38):
-```
-wget http://hgdownload.cse.ucsc.edu/goldenpath/hg38/phastCons100way/hg38.phastCons100way.bw
-```
-
-Mouse genome (GRCm38/mm10):
-```
-wget http://hgdownload.cse.ucsc.edu/goldenpath/mm10/phastCons60way/mm10.60way.phastCons.bw
-```
-
-Please set CONSERVATIONTRACK in the SPAR config file to the absolute path of the conservation bigWig track file.
-
 Samtools
 ```
 apt-get install samtools
 ```
-
 
 
 ## Recompiling bam2bedgraph binary (if necessary)
@@ -189,5 +189,5 @@ To process small RNA-seq data in *bigWig* format:
 
 To process web accessible (URL) small RNA-seq data:
 ```
-./SPAR.sh http://dashr2.lisanwanglab.org/DASHRv2/tracks/hg19/DASHR1_GEO_hg19/adipose1_GSE45159.pos.bigWig adipose_out config.hg19.sh
+./SPAR.sh https://www.lisanwanglab.org/DASHR/adipose_sample.bam config.hg19.sh
 ```
