@@ -172,13 +172,24 @@ brew install htslib
 g++ -O2 bam2bedgraph.cpp -o bam2bedgraph_interval -lhts
 ```
 
-## Preparing bigWig and BAM files from trimmed FASTQ
+## Preparing trimmed FASTQ
 
-To prepare bigWig files and BAM from the example trimmed and gzipped FASTQ file:
+To trim adapter sequences from sequencing reads, *trim_adapter.sh* script can be used:
+For example, to trim Illumina 3' adapter sequence:
+```
+bash scripts/trim_adapter.sh reads.fastq.gz -a TGGAATTCTCGGGTGCCAAGG
+```
+The trimming options are in CUTADAPT format (e.g., -a for 3', -b for 5' adapters, etc).
+This will generate trimmed FASTQ (reads_trimmed.fastq.gz).
+
+## Preparing bigWig and BAM files from trimmed FASTQ
+SPAR can be run using trimmed FASTQ, bigWig, or BAM as input.
+
+To prepare bigWig files and BAM from the trimmed and gzipped FASTQ file  :
 ```
 bash prepare_BAM_and_bigWigs_from_fastq.sh example-data.fastq.gz test_out config.hg19.sh
 ```
-
+(see [SPAR_prepare](https://bitbucket.org/wanglab-upenn/spar_prepare) repository and [README](https://bitbucket.org/wanglab-upenn/spar_prepare/src/master/README.md))
 ## Running SPAR pipeline
 
 SPAR pipeline (SPAR.sh script) usage:
@@ -198,5 +209,5 @@ To process small RNA-seq data in *bigWig* format:
 
 To process web accessible (URL) small RNA-seq data:
 ```
-./SPAR.sh https://www.lisanwanglab.org/DASHR/adipose_sample.bam config.hg19.sh
+./SPAR.sh http://tesla.pcbi.upenn.edu/~pkuksa/SPAR/sample/hg19/sample.bam config.hg19.sh
 ```
