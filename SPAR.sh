@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
-set -exv
+set -eE
+#set -xv
 set -o pipefail
+
+function error_handler() {
+  echo "***Error occurred at line: ${1}"
+  echo "***Exited with status: ${2}"
+}
+
+trap 'error_handler ${LINENO} $?' ERR
 
 export LC_ALL=C
 export LC_numeric="en_US.UTF-8"
@@ -606,8 +614,8 @@ fi
 
 annotFile=${finalAnnot}
 unannotFile=${finalUnannot}
-DASHRexpr=${SPARDATAPATH}/annot/DASHRv2/${genomeBuild}/DASHR1_GEO_${genomeBuild}.expressionRPM.txt.fixed
-DASHRUnAnnotexpr=${SPARDATAPATH}/annot/DASHRv2/${genomeBuild}/DASHR1_GEO_${genomeBuild}.unannot.expressionRPM.txt.fixed
+DASHRexpr=${SPARPATH}/annot/DASHRv2/${genomeBuild}/DASHR1_GEO_${genomeBuild}.expressionRPM.bed.gz #.disable #fixed
+DASHRUnAnnotexpr=${SPARPATH}/annot/DASHRv2/${genomeBuild}/DASHR1_GEO_${genomeBuild}.unannot.expressionRPM.bed.gz #fixed
 
 if [ -s ${DASHRexpr} ]; then
   annotDASHRexprFileOut="${annotFile}.dashr.expr.intersect.xls";
@@ -636,14 +644,9 @@ fi
 
 annotFile=${finalAnnot}
 unannotFile=${finalUnannot}
-ENCODEtable=${SPARPATH}/annot/ENCODE/A1_B2/ENCODE_tier1and2_annot_PEAKS_pavel.unique.csv
-ENCODEUnAnnottable=${SPARPATH}/annot/ENCODE/A1_B2/ENCODE_tier1and2_unannot_PEAKS_pavel.unique.csv
-ENCODEexpr=${SPARPATH}/annot/ENCODE/ENCODE_tier1and2_annot_PEAKS_pavel.unique.csv.expression_table.minLength10
-ENCODEUnAnnotexpr=${SPARPATH}/annot/ENCODE/ENCODE_tier1and2_annot_PEAKS_pavel.unique.csv.expression_table.minLength10
-ENCODEexpr=${SPARDATAPATH}/annot/DASHRv2/${genomeBuild}/ENCODE_dataportal_${genomeBuild}.expressionRPM.txt.fixed
-ENCODEUnAnnotexpr=${SPARDATAPATH}/annot/DASHRv2/${genomeBuild}/ENCODE_dataportal_${genomeBuild}.unannot.expressionRPM.txt.fixed
+ENCODEexpr=${SPARPATH}/annot/DASHRv2/${genomeBuild}/ENCODE_dataportal_${genomeBuild}.expressionRPM.bed.gz #.disable
 # only loci found in at least 2 tissues
-ENCODEUnAnnotexpr=${SPARDATAPATH}/annot/DASHRv2/${genomeBuild}/ENCODE_dataportal_${genomeBuild}.unannot.expressionRPM.txt.fixed.atleast2
+ENCODEUnAnnotexpr=${SPARPATH}/annot/DASHRv2/${genomeBuild}/ENCODE_dataportal_${genomeBuild}.unannot.expressionRPM.atleast2.bed.gz #.txt.atleast2
 if [ -s ${ENCODEexpr} ]; then
   annotENCODEexprFileOut="${annotFile}.encode.expr.intersect.xls";
   unannotENCODEexprFileOut="${unannotFile}.encode.expr.intersect.xls";
@@ -990,10 +993,6 @@ fi
 printf "<tr><td>RPM (average)<td class=\"alnright\">%'.2f" ${avgSegmExpr} >> ${runSummaryHtml}
 echo "</table>" >> ${runSummaryHtml}
 
-ENDTIME=$(date +%s)
-totalTime=$((ENDTIME-STARTTIME))
-processingSpeed=$(LC_ALL=en_US.UTF-8 awk 'BEGIN{printf "Processed %\047d reads in %\047d seconds (%\047d reads / second)\n", '${totalReads}', '${totalTime}', '${totalReads}'/('${totalTime}'+0.0); exit}')
-printT "${processingSpeed}"
 
 # get file sizes
 
@@ -1032,11 +1031,13 @@ awk 'BEGIN{d="'${OUTDIR}'/";}{gsub(d,"",$0); print $0;}' ${HTMLOUTPUT} > ${HTMLO
 
 # clean-up
 rm ${OUTDIR}/*.segm.* || true
-rm ${OUTDIR}/mapping/*.segm.* || true
 rm ${OUTDIR}/results/*.xls.*
 rm ${OUTDIR}/*.tmp || true
-rm ${OUTDIR}/mapping/*.tmp || true
-rm "${OUTDIR}/module3_annot.html" || true
+if [ "${isFASTQ}" = "1" ]; then
+  rm ${OUTDIR}/mapping/*.segm.* || true
+  rm ${OUTDIR}/mapping/*.tmp || true
+fi
+#rm "${OUTDIR}/module3_annot.html" || true
 
 # clean-up
 if [ "$doCleanup" = "1" ]; then
@@ -1050,5 +1051,11 @@ if [ "$doCleanup" = "1" ]; then
   #rm "${OUTDIR}"/results/Genomewide*txt || true
 fi
 
+ENDTIME=$(date +%s)
+totalTime=$((ENDTIME-STARTTIME))
+processingSpeed=$(LC_ALL=en_US.UTF-8 awk 'BEGIN{printf "Processed %\047d reads in %\047d seconds (%\047d reads / second)\n", '${totalReads}', '${totalTime}', '${totalReads}'/('${totalTime}'+0.0); exit}')
 
+printT "SPAR run completed."
+printT "${processingSpeed}"
+echo "Results saved to ${OUTDIR}"
 exit 0

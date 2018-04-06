@@ -1,0 +1,101 @@
+<h4>Reads vs RNA class</h4>
+<div class="chart-container"><canvas id="myChart" width="600" height="600"></canvas></div>
+<div class="chart-legend" id="legend1"></div>
+<script type="text/javascript">
+
+Chart.pluginService.register({
+  beforeDraw: function (chart) {
+    if (chart.config.options.elements.center) {
+      //Get ctx from string
+      var ctx = chart.chart.ctx;
+
+      //Get options from the center object in options
+      var centerConfig = chart.config.options.elements.center;
+      var fontStyle = centerConfig.fontStyle || 'Arial';
+      var txt = centerConfig.text;
+      var color = centerConfig.color || '#ccc';
+      var sidePadding = centerConfig.sidePadding || 20;
+      var sidePaddingCalculated = (sidePadding/100) * (chart.innerRadius * 2)
+      //Start with a base font of 30px
+      ctx.font = "30px " + fontStyle;
+
+      //Get the width of the string and also the width of the element minus 10 to give it 5px side padding
+      var stringWidth = ctx.measureText(txt).width;
+      var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+
+      // Find out how much the font can grow in width.
+      var widthRatio = elementWidth / stringWidth;
+      var newFontSize = Math.floor(30 * widthRatio);
+      var elementHeight = (chart.innerRadius * 2);
+
+      // Pick a new font size so it will not be larger than the height of label.
+      var fontSizeToUse = Math.min(newFontSize, elementHeight);
+
+      //Set font settings to draw it correctly.
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+      var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+      ctx.font = fontSizeToUse+"px " + fontStyle;
+      ctx.fillStyle = color;
+
+      //Draw text in center
+      ctx.fillText(txt, centerX, centerY);
+    }
+  }
+});
+
+var nums = [13794389,255026,12632578,31334821,375298,394158,427536,1641057,19345,180271,2640,35016,592489,514,508,37829];
+var lbls = ["Unannotated","miRNAprimary","mir-3p","mir-5p","mir-5p3pno","piRNA","rRNA","scRNA","snRNA","snoRNA","tRF-1-trfdb","tRF-3-trfdb","tRF-5-trfdb","tRF3","tRF5","tRNA"];
+var ctx = document.getElementById("myChart");
+var myDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data : {
+      datasets: [{
+          data: nums,
+          backgroundColor: [
+            "#36c", "#dc3912", "#66aa00", "#f90", "#316395", "#b82e2e", "#990099", "#128419", "#18add8", "#d47", "#818312", "#291283", "#831227", "#22adad", "#ad9522", "#ad7c22"
+          ]
+      }],
+
+
+      // These labels appear in the legend and in the tooltips when hovering different arcs
+      labels: lbls,
+    },
+    options: {
+      responsive: true,
+      pieceLabel: {
+        render: 'percentage',
+        fontColor: '#fff',
+        precision: 2
+      },
+      legend: {display: false},
+      // title: {
+      //   display: true,
+      //   fontSize: 18,
+      //   fontFamily: "'Rubik', sans-serif",
+      //   fontStyle: 'bold',
+      //   fontColor: '#444',
+      //   text: 'Samples per data source'
+      //
+      // },
+      animation: {
+        animateScale: true,
+        animateRotate: true
+      },
+      elements: {
+        center: {
+          text: '61,723,475',
+          color: '#666', //Default black
+          fontStyle: 'Roboto', //Default Arial
+          sidePadding: 30
+        }
+      }
+
+    }
+});
+
+var legend = myDoughnutChart.generateLegend().replace(/\"0-legend"/g, 'legend');
+$("#legend1").append(legend);
+
+</script>
