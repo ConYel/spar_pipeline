@@ -21,6 +21,7 @@ Provided *SPAR.sh* script automates processing, analysis, visualization of small
 
 ## Citation
 "SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments". Pavel P. Kuksa, Alexandre Amlie-Wolf, Zivadin Katanic, Otto Valladares, Li-San Wang, Yuk Yee Leung.
+https://academic.oup.com/nar/article/46/W1/W36/4992647#supplementary-data
 
 ## License
 SPAR is available for academic and nonprofit use for free ([MIT license](LICENSE.md)).
