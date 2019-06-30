@@ -1,5 +1,5 @@
 # SPAR: Small RNA-seq Portal for Analysis of sequencing expeRiments
-
+(Forked from wanglab-upenn bitbucket, https://bitbucket.org/wanglab-upenn/spar_pipeline/src/master/)
 Analysis, annotation, visualization of small RNA sequencing experiments
 
 Fast turn-around analyses for small RNA-seq, microRNA-seq, single-cell small RNA, and short total RNA sequencing data, as well as comparison of user-given sequencing data to reference data from DASHR normal human tissues/cell types and human ENCODE cell lines
