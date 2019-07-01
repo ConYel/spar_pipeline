@@ -1,15 +1,14 @@
 # map smRNA reads using STAR
 # Usage:
 # bash run_star_smRNA.sh <full path to sample FASTQ file>
-# Example: 
+# Example:
 # bash run_star_smrna.sh /mnt/niagads/users/yyee/tissues/hsa_adpilot_smrna/hsa_adpilot_ctl02058_smrna/1.5/hsa_adpilot_ctl02058_smrna_trimmed.fastq
-
 
 set -e
 
 #source `dirname $0`/../config.sh
 
-OUTDIR=$4
+OUTDIR=$5
 LOGSPAR=${OUTDIR}/SPAR.log
 function printT
 {
@@ -21,7 +20,8 @@ FASTQ=$1 # input FASTQ file
          # <tissue>_<SRR>_trimmed.fastq
 maxMismatchCnt=$2 #${maxMismatchCnt}
 multiMapMax=$3 #${maxMapCnt}
-starOutDir=$4
+threads=$4 #${THREADS}
+starOutDir=$5
 
 # STAR output directory (absolute path)
 mkdir -p ${starOutDir}
@@ -44,12 +44,12 @@ readFilesCommand=$( echo "${FASTQ}" |
                             exit;
                            }' )
 if [ "${readFilesCommand}" == "-" ]; then
-  ${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --runThreadN 4 --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
+  ${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --runThreadN $threads --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
 else
-  ${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --readFilesCommand "${readFilesCommand}" --runThreadN 4 --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
+  ${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --readFilesCommand "${readFilesCommand}" --runThreadN $threads --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
 fi
 
-#${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --runThreadN 4 --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
+#${STAR} --genomeDir ${genomeDir} --genomeLoad LoadAndKeep  --readFilesIn ${FASTQ} --runThreadN $threads --alignIntronMax 1 --outSAMattributes NH HI NM MD --outFilterMultimapNmax ${multiMapMax} --outReadsUnmapped Fastx --outFilterMismatchNmax ${maxMismatchCnt} --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}/
 
 nFastQReads=$(grep -e "Number of input reads" ${starOutDir}/Log.final.out | cut -f 2)
 
@@ -88,7 +88,7 @@ awk 'BEGIN{OFS="\t"; filtPos=0; filtNeg=0; alnCnt=0; totalAln=0; nFastQReads='${
        }
        else
        {
-          #if (a[readId]==1) readScnt++;  
+          #if (a[readId]==1) readScnt++;
           if (readId != readId_prev) readScnt++;
           softClipCnt++;
        }
@@ -99,16 +99,16 @@ awk 'BEGIN{OFS="\t"; filtPos=0; filtNeg=0; alnCnt=0; totalAln=0; nFastQReads='${
      END {
       filter5pStatsFile=(FILENAME ".filter_5p_stats");
       softClipStatsFile=(FILENAME ".softClipStats");
-      
+
       filt5pPosPct = 0.00;
       filt5pNegPct = 0.00;
       alnCntPct = 0.00;
-      if (totalAln>0) 
+      if (totalAln>0)
       {
          filt5pPosPct = filtPos / totalAln * 100.00;
          filt5pNegPct = filtNeg / totalAln * 100.00;
          alnCntPct = alnCnt / totalAln * 100.00;
-      }  
+      }
       print "Alignments before removing 5p clipping", totalAln, "100.00" > filter5pStatsFile
       print "Removed 5p clipped [positive strand]:",filtPos,filt5pPosPct > filter5pStatsFile;
       print "Removed 5p clipped [negative strand]:", filtNeg, filt5pNegPct > filter5pStatsFile;
@@ -135,7 +135,7 @@ awk 'BEGIN{OFS="\t"; filtPos=0; filtNeg=0; alnCnt=0; totalAln=0; nFastQReads='${
 
 # convert filtered SAM to BAM file format
 printT "Sorting filtered SAM"
-${SAMTOOLS} sort -@ 4 -O bam ${starOutDir}/Aligned.out.filtered.sam -T ${starOutDir}/Aligned.out.filtered.sort > ${starOutDir}/Aligned.out.filtered.sorted.bam
+${SAMTOOLS} sort -@ $threads -O bam ${starOutDir}/Aligned.out.filtered.sam -T ${starOutDir}/Aligned.out.filtered.sort > ${starOutDir}/Aligned.out.filtered.sorted.bam
 
 # remove soft-clipped reads
 #printT "Removing soft-clipped reads"
@@ -144,11 +144,11 @@ ${SAMTOOLS} sort -@ 4 -O bam ${starOutDir}/Aligned.out.filtered.sam -T ${starOut
 
 # hard-clip filtered sorted BAM file
 printT "Hard-clipping filtered sorted BAM"
-#${SAMTOOLS} view -h -@ 4 ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
+#${SAMTOOLS} view -h -@ $threads ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
 
 STATCIGAR=${starOutDir}/cigar.stat
 >${STATCIGAR}
-${SAMTOOLS} view -h -@ 4 ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print; cigar=$6; cigarCnt[cigar]++;}END{for (c in cigarCnt) print c, cigarCnt[c] > "'${STATCIGAR}'"}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
+${SAMTOOLS} view -h -@ $threads ${starOutDir}/Aligned.out.filtered.sorted.bam | awk 'BEGIN {OFS="\t"}{if ($0~/^@/) {print; next}; split($6,C,/[0-9]*/); split($6,L,/[SMDIN]/); if (C[2]=="S") {$10=substr($10,L[1]+1); $11=substr($11,L[1]+1)}; if (C[length(C)]=="S") {L1=length($10)-L[length(L)-1]; $10=substr($10,1,L1); $11=substr($11,1,L1); }; gsub(/[0-9]*S/,"",$6); print; cigar=$6; cigarCnt[cigar]++;}END{for (c in cigarCnt) print c, cigarCnt[c] > "'${STATCIGAR}'"}' | ${SAMTOOLS} view -@ 4 -bS - > ${starOutDir}/Aligned.out.filtered.hardClipped.sorted.bam
 sort -k2,2nr ${STATCIGAR} -o ${STATCIGAR}
 
 # index BAM
@@ -195,4 +195,4 @@ rm ${starOutDir}/*.sam
 
 # ENCODE param
 #minMappedLength=16
-#${STAR} --genomeDir ${genomeDir}  --readFilesIn ${FASTQ} --runThreadN 4 --alignIntronMax 1 --outSAMattributes All --outFilterMultimapNmax ${multiMapMax} --outFilterScoreMinOverLread 0  --outFilterMatchNminOverLread 0 --outReadsUnmapped Fastx --outFilterMismatchNoverLmax 0.05 --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}
+#${STAR} --genomeDir ${genomeDir}  --readFilesIn ${FASTQ} --runThreadN $threads --alignIntronMax 1 --outSAMattributes All --outFilterMultimapNmax ${multiMapMax} --outFilterScoreMinOverLread 0  --outFilterMatchNminOverLread 0 --outReadsUnmapped Fastx --outFilterMismatchNoverLmax 0.05 --outFilterMatchNmin ${minMappedLength} --outFileNamePrefix ${starOutDir}
