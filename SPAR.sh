@@ -14,13 +14,15 @@ export LC_ALL=C
 export LC_numeric="en_US.UTF-8"
 
 if [ $# -lt 3 ]; then
-  echo "USAGE: `basename $0` <reads.fastq.gz|aln.bam|signal.bigWig|URL.bam> <SPAR_output_directory> <SPAR_config.sh>"
+  echo "USAGE: `basename $0` <reads.fastq.gz|aln.bam|signal.bigWig|URL.bam> <SPAR_output_directory> <SPAR_config.sh> <number_of_threads>"
   exit 1
 fi
 
 sparCommandLine="$0 $@"
 
 configFile=${3:-config.sh}
+
+threads=${4:-4}
 
 if [ -s ${configFile} ]; then
   source "${configFile}"
@@ -52,7 +54,7 @@ INFILE=$1
 
 # set SPARDIR output directory to specified directory if any, or use
 # default directory from config file
-SPARDIR=${2:-${SPARDIR}} 
+SPARDIR=${2:-${SPARDIR}}
 
 # path do SPAR root
 SPARPATH=`dirname $0`
@@ -113,8 +115,8 @@ if [ "${FILETYPE}" = "gz" ] || [ "${FILETYPE}" = "bz2" ]; then
 fi
 
 
-lcFILETYPE=$(echo ${FILETYPE} | awk '{print tolower($0)}') # lower-case 
-ucFILETYPE=$(echo ${FILETYPE} | awk '{print toupper($0)}') # upper-case 
+lcFILETYPE=$(echo ${FILETYPE} | awk '{print tolower($0)}') # lower-case
+ucFILETYPE=$(echo ${FILETYPE} | awk '{print toupper($0)}') # upper-case
 
 isBAM=0
 isBIGWIG=0
@@ -148,7 +150,7 @@ if [ "${isFASTQ}" = 1 ]; then
   OUTDIR=${SPARDIR}/${EXPNAME}_m${maxMismatchCnt}_map${maxMapCnt}
   OUTBAM=${OUTDIR}/mapping/Aligned.out.filtered.hardClipped.sorted.bam
   mkdir -p ${OUTDIR}/mapping
-elif [ "${isBAM}" = 1 ]; then 
+elif [ "${isBAM}" = 1 ]; then
   # if input is mapped BAM file
   if [ -z "$2" ]; then
     # if no output directory is provided, use BAM file directory
@@ -219,7 +221,7 @@ HTMLOUTPUT=${OUTDIR}/results.html
 resultsTemplate="`dirname $0`/templates/spar_results_template.html"
 if [ "${isBAM}" = 1 ]  || [ "${isFASTQ}" = 1 ]; then
   resultsTemplate="`dirname $0`/templates/spar_results_template.with_mat_seqs.html"
-fi 
+fi
 cat ${resultsTemplate} | \
 while read -r line; do
     while [[ "$line" =~ ([{][A-Z]*[}]) ]] ; do
@@ -228,13 +230,13 @@ while read -r line; do
         line=${line//\$${LHS}/${RHS}}
     done
     echo "$line"
-done > ${HTMLOUTPUT} 
+done > ${HTMLOUTPUT}
 
 awk 'BEGIN{d="'${OUTDIR}'/";}{gsub(d,"",$0); print $0;}' ${HTMLOUTPUT} > ${HTMLOUTPUT/.html/.local.html}
 
 keep5pClipped=""
 # parse command line arguments
-shift 3
+shift 4
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --min_read_length=*)
@@ -313,7 +315,7 @@ printT "SPAR ${ucFILETYPE} run started"
 
 # map reads if FASTQ is given at the input (this will create BAM file)
 if [ "${isFASTQ}" = 1 ]; then
-  runScript "run_star_smrna2.sh ${INFILE} ${maxMismatchCnt} ${maxMapCnt} ${OUTDIR}/mapping"
+  runScript "run_star_smrna2.sh ${INFILE} ${maxMismatchCnt} ${maxMapCnt} ${threads} ${OUTDIR}/mapping"
 fi
 
 # convert BAM to BEDGRAPH
@@ -326,7 +328,7 @@ if [ "${isBAM}" = 1 ] || [ "${isFASTQ}" = 1 ]; then
     printT "bam_to_bedgraph2_interval_cut_cpp.sh ${OUTBAM} ${OUTDIR}/mapping ${minReadLength} ${maxReadLength} ${keep5pClipped}"
     runScript "bam_to_bedgraph2_interval_cut_cpp.sh ${OUTBAM} ${OUTDIR}/mapping ${minReadLength} ${maxReadLength} ${keep5pClipped}"
   fi
- 
+
   if [ "${isBAM}" = 1 ]; then
     if [ "${isURL}" = 1 ]; then
       OUTBAM=${OUTDIR}/input.bam
@@ -372,7 +374,7 @@ if [ "${isBIGWIG}" = 1 ]; then
     OPPBIGWIG=${OPPBIGWIG/.neg./.pos.}
     oppStrand="pos"
   fi
-  
+
   doOppStrand=0
   if [ -s "${OPPBIGWIG}" ] && [ "${OPPBIGWIG}" != "${INBIGWIG}" ]; then
     doOppStrand=1
@@ -383,7 +385,7 @@ if [ "${isBIGWIG}" = 1 ]; then
   OUTBEDGRAPHOPP=${OUTBAM}.${oppStrand}.bedgraph
   echo "doOppStrand=${doOppStrand}; OPPBIGWIG=${OPPBIGWIG}"
   if [ "${doOppStrand}" = 0 ]; then
-    ${BIGWIGTOBEDGRAPH} ${INBIGWIG} ${OUTBEDGRAPH} # convert bigWig to bedGraph 
+    ${BIGWIGTOBEDGRAPH} ${INBIGWIG} ${OUTBEDGRAPH} # convert bigWig to bedGraph
     printT "Segmenting BIGWIG"
     runScript "segment_bedgraph_entropy_position2.sh ${OUTBEDGRAPH} ${strand}"
 
@@ -404,9 +406,9 @@ if [ "${isBIGWIG}" = 1 ]; then
     echo "${OUTBEDGRAPH}"
     echo "${OUTBEDGRAPHOPP}"
     # convert bigWig to bedGraph
-    ${BIGWIGTOBEDGRAPH} ${INBIGWIG} ${OUTBEDGRAPH} 
-    ${BIGWIGTOBEDGRAPH} ${OPPBIGWIG} ${OUTBEDGRAPHOPP} 
-   
+    ${BIGWIGTOBEDGRAPH} ${INBIGWIG} ${OUTBEDGRAPH}
+    ${BIGWIGTOBEDGRAPH} ${OPPBIGWIG} ${OUTBEDGRAPHOPP}
+
     if [ "${strand}" = "pos" ]; then
       cp  ${OUTBEDGRAPH} ${RAWPLUSBG}
       cp  ${OUTBEDGRAPHOPP} ${RAWMINUSBG}
@@ -418,13 +420,13 @@ if [ "${isBIGWIG}" = 1 ]; then
     runScript "segment_bedgraph_entropy_position2.sh ${OUTBEDGRAPH} ${strand}"
     runScript "segment_bedgraph_entropy_position2.sh ${OUTBEDGRAPHOPP} ${oppStrand}"
     # add features to segmentation output
-    
+
     OUTBEDGRAPHPOS=${OUTBAM}.pos.bedgraph.segm
     OUTBEDGRAPHNEG=${OUTBAM}.neg.bedgraph.segm
     wc -l ${OUTBAM}.*.bedgraph
     wc -l ${OUTBAM}.*.bedgraph.segm
     bash ${SPARPATH}/scripts/add_features_to_segm.sh ${OUTBEDGRAPHPOS} ${OUTBEDGRAPHNEG}
- 
+
 
     numFields=$(awk '{print NF; exit}' ${OUTBEDGRAPH}.segm)
     printT "Creating called peaks track BIGWIG"
@@ -434,7 +436,7 @@ if [ "${isBIGWIG}" = 1 ]; then
     printT "Annotating peaks BIGWIG"
     runScript "annotate_segm31.sh ${OUTBEDGRAPH}.segm"
     runScript "annotate_segm31.sh ${OUTBEDGRAPHOPP}.segm"
-    
+
   fi
 
 else
@@ -508,7 +510,7 @@ sort -k1,1 -k2,2n -k3,3n -k6,6 ${finalAnnot} -o ${finalAnnot}
 
 # ALL peak table
 segmAllBED=${PEAKBEDALL}
-cat ${OUTBAM}*.segm | sort -k1,1 -k2,2n -k3,3n -k6,6 > ${segmAllBED} 
+cat ${OUTBAM}*.segm | sort -k1,1 -k2,2n -k3,3n -k6,6 > ${segmAllBED}
 segmAllFile=${PEAKTABLEALL}
 cat ${segmHeaderFile} ${segmAllBED} > ${segmAllFile}
 
@@ -555,7 +557,7 @@ awk 'BEGIN{OFS="\t"; sep="\t";offset='${numFields}'+0;librarySize='${librarySize
          exprGeneName=$(4+offset); # expressed gene name
          refGeneExpr[exprGeneName]+=exprVal;
        }
-       
+
      }
      END{ for (g in refGeneTable)
             print g, refGeneTable[g], refGeneExpr[g], refGeneExpr[g]/librarySize*1000000;
@@ -577,14 +579,14 @@ fi
   printT "Computing overlapping genomic elements..."
   fprefix="peaks"
   printT "Computing overlapping mRNA elements..."
-  echo "calculate_mRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_mRNA_annotations_both_strand_with_names.bed.gz" 
-  runScript "calculate_mRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_mRNA_annotations_both_strand_with_names.bed.gz" 
+  echo "calculate_mRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_mRNA_annotations_both_strand_with_names.bed.gz"
+  runScript "calculate_mRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_mRNA_annotations_both_strand_with_names.bed.gz"
   printT "Computing overlapping lncRNA elements..."
-  runScript "calculate_lncRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_lncRNA_annotations_both_strand_with_names.bed.gz" 
+  runScript "calculate_lncRNA_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_lncRNA_annotations_both_strand_with_names.bed.gz"
   printT "Computing overlapping repeat elements..."
-  runScript "calculate_repeat_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_repeat_annotations_both_strand_with_names.bed.gz" 
+  runScript "calculate_repeat_genomic_partition.sh ${OUTDIR}/results ${fprefix} ${SPARPATH}/annot/partition_files/${genomeBuild}/all_repeat_annotations_both_strand_with_names.bed.gz"
   printT "Computing overlapping elements combining results ..."
-  runScript "combine_partition_results.sh ${OUTDIR}/results ${fprefix}" 
+  runScript "combine_partition_results.sh ${OUTDIR}/results ${fprefix}"
   printT "Done computing overlapping genomic elements."
 
 avgMatLen="-1"
@@ -697,14 +699,14 @@ awk 'BEGIN{ numFields='${numFields}'+0; # number of fields after segm
        if (rnaClassCnt[rnaClass]==1)
           print header > outfile
        #print outfile
-       
+
        print > outfile;
      }' ${finalAnnot}
 
 # annotation summary
 annotSummary=${OUTBAM}.mapped_reads_annotation_summary.txt
 annotSummary=${OUTDIR}/results/annotation_summary.txt
-awk 'BEGIN{OFS="\t";totalAnnotPeakCnt=0; totalUnannotPeakCnt=0;totalExprAnnot=0;totalExprUnannot=0;numFields='${numFields}'+0;}{if ($0~/^#/) {next}; if (NR==FNR) {geneID=$(numFields+4); rnaClass=$(numFields+5);  n=split(geneID,a,":"); gene=a[n]; gene=geneID; if (ids[gene]!=1) {ids[gene]=1; perClassGeneCnt[rnaClass]++;totalAnnotGeneCnt++;}; exprVal=$5; exprPerClass[rnaClass]+=exprVal;classCnt[rnaClass]+=1;totalExprAnnot+=exprVal; totalAnnotPeakCnt+=1}else{exprVal=$5; totalExprUnannot+=exprVal;totalUnannotPeakCnt+=1;}}END{totalPeakCnt=totalAnnotPeakCnt+totalUnannotPeakCnt; totalExpr=totalExprAnnot+totalExprUnannot; for (rnaClass in exprPerClass) printf "%s\t%d\t%d\t%d\t%.2f\n", rnaClass, classCnt[rnaClass], perClassGeneCnt[rnaClass]+0, exprPerClass[rnaClass], 100*exprPerClass[rnaClass]/totalExpr; propAnnot=0; if (totalExpr>0) propAnnot=totalExprAnnot/totalExpr; printf "%s\t%d\t%d\t%d\t%.2f\n", "Annotated", totalAnnotPeakCnt, totalAnnotGeneCnt, totalExprAnnot, 100*propAnnot; propUnannot=0; if (totalExpr>0) propUnannot=totalExprUnannot/totalExpr; printf "%s\t%d\t%d\t%d\t%.2f\n", "Unannotated",totalUnannotPeakCnt,totalUnannotPeakCnt,totalExprUnannot,100*propUnannot}' ${finalAnnot} ${finalUnannot} | sort -k1,1 | awk 'BEGIN{OFS="\t"; print "#RNA class","Peaks","Genes", "Reads","Percentage of reads"}{print}' > ${annotSummary} 
+awk 'BEGIN{OFS="\t";totalAnnotPeakCnt=0; totalUnannotPeakCnt=0;totalExprAnnot=0;totalExprUnannot=0;numFields='${numFields}'+0;}{if ($0~/^#/) {next}; if (NR==FNR) {geneID=$(numFields+4); rnaClass=$(numFields+5);  n=split(geneID,a,":"); gene=a[n]; gene=geneID; if (ids[gene]!=1) {ids[gene]=1; perClassGeneCnt[rnaClass]++;totalAnnotGeneCnt++;}; exprVal=$5; exprPerClass[rnaClass]+=exprVal;classCnt[rnaClass]+=1;totalExprAnnot+=exprVal; totalAnnotPeakCnt+=1}else{exprVal=$5; totalExprUnannot+=exprVal;totalUnannotPeakCnt+=1;}}END{totalPeakCnt=totalAnnotPeakCnt+totalUnannotPeakCnt; totalExpr=totalExprAnnot+totalExprUnannot; for (rnaClass in exprPerClass) printf "%s\t%d\t%d\t%d\t%.2f\n", rnaClass, classCnt[rnaClass], perClassGeneCnt[rnaClass]+0, exprPerClass[rnaClass], 100*exprPerClass[rnaClass]/totalExpr; propAnnot=0; if (totalExpr>0) propAnnot=totalExprAnnot/totalExpr; printf "%s\t%d\t%d\t%d\t%.2f\n", "Annotated", totalAnnotPeakCnt, totalAnnotGeneCnt, totalExprAnnot, 100*propAnnot; propUnannot=0; if (totalExpr>0) propUnannot=totalExprUnannot/totalExpr; printf "%s\t%d\t%d\t%d\t%.2f\n", "Unannotated",totalUnannotPeakCnt,totalUnannotPeakCnt,totalExprUnannot,100*propUnannot}' ${finalAnnot} ${finalUnannot} | sort -k1,1 | awk 'BEGIN{OFS="\t"; print "#RNA class","Peaks","Genes", "Reads","Percentage of reads"}{print}' > ${annotSummary}
 
 chartLabelsFile=${OUTDIR}/results/chart.labels
 chartReadsFile=${OUTDIR}/results/chart.reads.data
@@ -730,22 +732,22 @@ LC_ALL=en_US.UTF-8 awk 'BEGIN{FS="\t";
           printf "\n" > chartLabelsFile
           printf "\n" > chartReadsFile
           printf "\n" > chartPeaksFile
-          printf "%\047d", totalPeaks > (chartPeaksFile ".sum") 
-          printf "%\047d", totalReads > (chartReadsFile ".sum") 
+          printf "%\047d", totalPeaks > (chartPeaksFile ".sum")
+          printf "%\047d", totalReads > (chartReadsFile ".sum")
      }' ${annotSummary}
 
 # reads chart
 cat "${chartReadsFile}" "${chartLabelsFile}" "${chartReadsFile}.sum" | \
-  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart1.download.html > ${OUTDIR}/figures/chart_reads_download.html 
+  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart1.download.html > ${OUTDIR}/figures/chart_reads_download.html
 
 cat "${chartReadsFile}" "${chartLabelsFile}" "${chartReadsFile}.sum" | \
-  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart1.html > ${OUTDIR}/figures/chart_reads.html 
+  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart1.html > ${OUTDIR}/figures/chart_reads.html
 # peaks chart
 cat "${chartPeaksFile}" "${chartLabelsFile}" "${chartPeaksFile}.sum" | \
-  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart2.download.html > ${OUTDIR}/figures/chart_peaks_download.html 
+  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart2.download.html > ${OUTDIR}/figures/chart_peaks_download.html
 
 cat "${chartPeaksFile}" "${chartLabelsFile}" "${chartPeaksFile}.sum" | \
-  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart2.html > ${OUTDIR}/figures/chart_peaks.html 
+  awk '{if (FNR==NR) {data[FNR]=$0;} else { gsub("numbers_here", ("[" data[1] "]")); gsub("labels_here", ("[" data[2] "]")); gsub("sum_here", ("\x27" data[3]  "\x27") );  print; }}' - ${SPARPATH}/templates/chart2.html > ${OUTDIR}/figures/chart_peaks.html
 
 if [ 1 -eq 0 ]; then
 awk 'BEGIN{FS="\t"; OFS="\t";numFields='${numFields}'+0;}
@@ -776,7 +778,7 @@ awk 'BEGIN{FS="\t"; OFS="\t"}
        peakStart = $2; # 0-based
        peakEnd = $3; # 1-based according to 0-based, half-open UCSC notation
        peakLength = peakEnd-peakStart;
-       lengthCnt[peakLength]+=1;  
+       lengthCnt[peakLength]+=1;
        totalPeakCnt+=1;
      }
      END{ for (l in lengthCnt)
@@ -795,7 +797,7 @@ awk 'BEGIN{FS="\t"; OFS="\t"}
        peakStart = $2; # 0-based
        peakEnd = $3; # 1-based according to 0-based, half-open UCSC notation
        peakLength = peakEnd-peakStart;
-       lengthCnt[peakLength]+=1;  
+       lengthCnt[peakLength]+=1;
        totalPeakCnt+=1;
      }
      END{ for (l in lengthCnt)
@@ -827,14 +829,14 @@ ls ${OUTDIR}/tracks/*.bigBed | tee -a ${LOGSPAR}
 printL "\nAnnotation output:"
 ls ${finalAnnot} | tee -a ${LOGSPAR}
 
-printL "\nUn-annotated output:" 
+printL "\nUn-annotated output:"
 ls ${finalUnannot} | tee -a ${LOGSPAR}
 
 
 printL "\nAnnotation summary:"
 ls ${annotSummary}  | tee -a ${LOGSPAR}
 
-if [ "${isFASTQ}" = 1 ]; then 
+if [ "${isFASTQ}" = 1 ]; then
   printL "\nMapping stats:"
   ls ${OUTDIR}/mapping/MAPSTAT.txt | tee -a ${LOGSPAR}
   printL "\nMapped reads alignment summary:"
@@ -845,7 +847,7 @@ fi
 
 printL "\n\n===Run summary==="
 
-if [ "${isFASTQ}" = 1 ]; then 
+if [ "${isFASTQ}" = 1 ]; then
   printL "FASTQ: ${INFILE}"
   grep -e "FASTQ reads" ${OUTDIR}/mapping/MAPSTAT.txt | awk 'BEGIN{FS="\t"}{printf "Total reads: %d [%.4f%%]\n", $2, $3}' | tee -a ${LOGSPAR}
   grep -e "Reads \[all\]" ${OUTDIR}/mapping/MAPSTAT.txt | awk 'BEGIN{FS="\t"}{printf "Reads after QC: %d [%.4f%%]\n", $2, $3}' | tee -a ${LOGSPAR}
@@ -883,14 +885,14 @@ if [  "${isBAM}" = 1 ] || [ "${isFASTQ}" = 1 ]; then
   fprefix="peaks";
   cat ${SPARPATH}/scripts/R/${module}/${step}/*.r | \
      awk 'BEGIN{wdir="wdir=\"'${OUTDIR}'\""; print wdir; fprefix="fprefix=\"'${fprefix}'\""; print fprefix; maxReadLength="maxReadLength='${maxReadLength}'"; print maxReadLength;}{print}' - > ${outRscript}
-  
-  
+
+
   submoduleDir=${SPARPATH}/scripts/R/${module}/${step}
 
   makehtmlcmd="make_submodule_html.sh ${submoduleDir} . > ${OUTDIR}/${module}_${step}.html"
   echo "bash ${SPARPATH}/scripts/${makehtmlcmd}" >> ${plot_script}
   echo "${RSCRIPT} ${outRscript} &>> ${RLOG}" >> ${plot_script}
-fi 
+fi
 
 if [ "${isFASTQ}" = 1 ]; then
 
@@ -1024,7 +1026,7 @@ while read -r line; do
         line=${line//\$${LHS}/${RHS}}
     done
     echo "$line"
-done > ${HTMLOUTPUT} 
+done > ${HTMLOUTPUT}
 
 awk 'BEGIN{d="'${OUTDIR}'/";}{gsub(d,"",$0); print $0;}' ${HTMLOUTPUT} > ${HTMLOUTPUT/.html/.local.html}
 

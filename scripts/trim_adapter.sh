@@ -1,5 +1,6 @@
 #!/bin/bash
 
+## use smrna_adapter_cut.sh from spar_prepare workflow instead
 set -e
 
 CUTADAPT=$( command -v cutadapt )
