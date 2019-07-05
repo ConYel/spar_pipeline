@@ -939,7 +939,8 @@ SKIP_MODULE1
   echo -e "exit 0" >> ${OUTDIR}/make_plots_parallel.sh
 
   echo "bash ${OUTDIR}/make_plots_parallel.sh" >> ${plot_script}
-
+  # run plot script
+  bash "${plot_script}"
 
   cp ${finalAnnot}  ${OUTDIR}/results/byClass/peaks.byClass.Annotated.xls
   cp ${finalUnannot}  ${OUTDIR}/results/byClass/peaks.byClass.Unannotated.xls
