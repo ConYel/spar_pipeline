@@ -1,7 +1,7 @@
 # SPAR config file
 
 export HOMEDIR="/root/miniconda" 
-export OUTRESDIR="/doc_out"
+export OUTRESDIR="my_data"
 
 #absolute path to the bin directory
 export BINDIR="${HOMEDIR}/bin"
