@@ -34,7 +34,7 @@ func_list_list <- list(
 ## source everything (these cant have function calls in them)
 #r_files <- list.files(path="SPAR-master/scripts/R/module3",pattern="^M.+\\.r$",full.names=TRUE)
 #r_files <- list.files(path="scripts/R/module3",pattern="^M.+\\.r$",full.names=TRUE)
-r_files <- list.files(path=paste0(SPAR_path, "/scripts/R/module3"),pattern="^M.+\\.r$",full.names=TRUE)r_files <- list.files(path="SPAR-master/scripts/R/module3",pattern="^M.+\\.r$",full.names=TRUE)
+r_files <- list.files(path = paste0(SPAR_path, "/scripts/R/module3"), pattern = "^M.+\\.r$", full.names=TRUE)
 lapply(r_files, source)
 
 ## make our cluster
