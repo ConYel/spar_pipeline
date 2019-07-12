@@ -18,9 +18,9 @@ export SPARDATAPATH="/home/spar_pipeline/annot"
 #absolute path to the STAR genome index
 export STAR="${BINDIR}/STAR" # STAR
 #export STAR="/usr/bin/STAR" # STAR
-export genomeDir="/home/${OUTRESDIR}/hg38/star"  # STAR genome index
-export GENOMEFA="/home/${OUTRESDIR}/hg38.fa"
-export CONSERVATIONTRACK="/home/${OUTRESDIR}/hg38.phastCons100way.bw"
+export genomeDir="/home/${OUTRESDIR}/genome/hg38/star"  # STAR genome index
+export GENOMEFA="/home/${OUTRESDIR}/genome/hg38.fa"
+export CONSERVATIONTRACK="/home/${OUTRESDIR}/genome/hg38.phastCons100way.bw"
 
 #absolute path to pre-installed STAR, samtools, AWK, etc
 
