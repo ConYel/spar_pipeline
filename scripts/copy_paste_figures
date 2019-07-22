@@ -1,5 +1,7 @@
 #!/bin/bash
-# File: copy_pasta_figures.sh
+# File: copy_paste_figures.sh
+## Konstantinos Con_Yel
+## Copy all figures from resulted sample's folders of SPAR workflow to "output_fig_SPAR/"
 
 INPUT_F=$1
 OUTPUT_F=$2
@@ -41,3 +43,5 @@ css_f=$(find $INPUT_F/ -type d  -name "css" | head -1)
 js_f=$(find $INPUT_F/ -type d  -name "js" | head -1)
 
 cp -R {$css_f,$js_f} $OUTPUT_F/
+
+## Konstantinos Con_Yel
