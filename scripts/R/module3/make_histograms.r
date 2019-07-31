@@ -4,22 +4,16 @@ files_hist <- dir(full.names = TRUE,
                   recursive = TRUE,
                   pattern = "histogram_table.txt")
 
-sapply(files_hist, function(x)
-      read_tsv(x, col_names = c("count", "length"),
-              col_types = cols_only(
-              count = col_integer(),
-              length = col_integer()
-              )) %>%
-    ggplot(aes(x = length )) +
-    geom_histogram(
-      binwidth = 0.5,
-      color = "red",
-      fill = "red",
-      alpha = .2) +
+sapply(files_hist, function(x)read_delim(x, col_names = c("count", "length"),
+           delim = " ") %>% 
+         mutate(count = as.numeric(str_trim(count)))%>% as_tibble() %>% 
+    mutate(count = as_vector(str_trim(count))) %>% 
+    ggplot(aes(x = length, y =  count)) +
+    geom_bar(stat="identity") +
     theme_minimal() +
-    labs(title="filtered softclipped reads Length Distribution",
+    labs(title="Filtered softclipped reads Length Distribution",
          y = "count")+
-    scale_x_continuous(limits = c(13,51), breaks = seq(13,51,by = 1)) + 
+    scale_x_continuous(breaks = seq(13,52,by = 2)) + 
     ggsave(filename = "histogram_length_distribution.pdf",
            device = "pdf",
            dpi = "retina",
