@@ -14,11 +14,7 @@ fi
  
 for filt_bam in $INPUT_F/*/mapping/Aligned.out.filtered.sorted.bam; do
 [ -f "$filt_bam" ] || continue
-#  str="${filt_bam##$INPUT_F/}"      #remove guiding path
   filename="${filt_bam%%/mapping*}" #remove trailing path
-#  figur="${str##*/}"           #remove guiding
-#  figure="${figur%%.png}"      #get figure name
- echo "$filt_bam" 
- echo "$filename"
  echo "samtools view -@ $nthreads  "$filt_bam"   | awk '{print length($10)}'  | sort -u > ${filename}/results/histogram_table.txt"
+ samtools view -@ $nthreads  "$filt_bam"   | awk '{print length($10)}'  | sort -u > ${filename}/results/histogram_table.txt
   done
