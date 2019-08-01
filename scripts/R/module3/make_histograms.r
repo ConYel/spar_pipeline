@@ -6,8 +6,7 @@ files_hist <- dir(full.names = TRUE,
 
 sapply(files_hist, function(x)read_delim(x, col_names = c("count", "length"),
            delim = " ") %>% 
-         mutate(count = as.numeric(str_trim(count)))%>% as_tibble() %>% 
-    mutate(count = as_vector(str_trim(count))) %>% 
+         mutate(count = as.numeric(str_trim(count))) %>% 
     ggplot(aes(x = length, y =  count)) +
     geom_bar(stat="identity") +
     theme_minimal() +
@@ -19,3 +18,13 @@ sapply(files_hist, function(x)read_delim(x, col_names = c("count", "length"),
            dpi = "retina",
            path = str_replace(x,"/results/histogram_table.txt","/figures"))
 )
+
+
+files_hist[1] %>% 
+    read_delim(col_names = c("count", "length"),
+                             delim = " ") %>% 
+    mutate(count = as.numeric(str_trim(count))) %>% 
+    mutate(countm = count / 1e6)%>% 
+    ggplot(aes(x = length, y =  countm)) +
+    geom_bar(stat="identity") +
+    theme_minimal() 
