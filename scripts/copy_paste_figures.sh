@@ -33,6 +33,16 @@ for png in $INPUT_F/*/figures/*.png; do
   figure="${figur%%.png}"      #get figure name
   cp -uv  $png $OUTPUT_F/${figure}_${filename}.png
   done
+
+for pdf in $INPUT_F/*/figures/*.pdf; do
+[ -f "$pdf" ] || continue
+  str="${pdf##$INPUT_F/}"      #remove guiding path
+  filename="${str%%.trimmed*}" #remove trailing path
+  figur="${str##*/}"           #remove guiding
+  figure="${figur%%.pdf}"      #get figure name
+  cp -uv  $pdf $OUTPUT_F/${figure}_${filename}.pdf
+  done
+
  
 for html in $INPUT_F/*/figures/*.html;do
 [ -f "$html" ] || continue
