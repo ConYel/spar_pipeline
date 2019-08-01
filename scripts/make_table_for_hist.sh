@@ -15,6 +15,6 @@ fi
 for filt_bam in $INPUT_F/*/mapping/Aligned.out.filtered.sorted.bam; do
 [ -f "$filt_bam" ] || continue
   filename="${filt_bam%%/mapping*}" #remove trailing path
- echo "samtools view -@ $nthreads  "$filt_bam"   | awk '{print length($10)}'  | sort | uniq -c > ${filename}/results/histogram_table.txt"
- samtools view -@ $nthreads  "$filt_bam"   | awk '{print length($10)}'  | sort | uniq -c > ${filename}/results/histogram_table.txt
+ echo "samtools view -@ $nthreads  "$filt_bam" -F 256  | awk '{print length($10)}'  | sort | uniq -c > ${filename}/results/histogram_table.txt"
+ samtools view -@ $nthreads  "$filt_bam" -F 256 | awk '{print length($10)}'  | sort | uniq -c > ${filename}/results/histogram_table.txt
   done
