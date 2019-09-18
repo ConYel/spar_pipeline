@@ -48,7 +48,7 @@ export minCoverage=10 # minimum read coverage
 export minFoldChange=2 # minimum fold change (read coverage(i)/read_coverage(i-1)) 
                        # for peak detection
 export max5pClip=1 # maximum allowed 5' end clipping ('S' in the CIGAR string) 
-
+export keep5pClipped=0 # by default all reads clipped at 5' are excluded from analysis
 
 export RSCRIPT="/usr/bin/Rscript"
 #export RSCRIPT="${BINDIR}/Rscript"
