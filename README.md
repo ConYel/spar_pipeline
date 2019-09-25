@@ -214,3 +214,16 @@ To process web accessible (URL) small RNA-seq data:
 ```
 ./SPAR.sh http://tesla.pcbi.upenn.edu/~pkuksa/SPAR/sample/hg19/sample.bam config.hg19.sh
 ```
+
+### Running in a folder
+small RNA adapter trimming with 10 processors
+```
+for file in my_data/*.fastq.gz;do echo ./spar_prepare/smrna_adapter_cut.sh $file 10;done 
+```
+
+SPAR pipeline (SPAR.sh script) with 10 processors
+```
+for file in my_data/*trimmed.fastq.gz;do echo ./spar_pipeline/SPAR.sh $file ./my_data/results_file ./spar_pipeline/config.docker.hg38.sh  10;done 
+
+```
+
