@@ -220,6 +220,13 @@ small RNA adapter trimming with 10 processors
 ```
 for file in my_data/*.fastq.gz;do echo ./spar_prepare/smrna_adapter_cut.sh $file 10;done 
 ```
+optional, copy database files
+```
+cp hg38.fulltable.no_mRNA_no_lncRNA_piRNAonly.unique_LOC_pirDB.bed spar_pipeline/annot/hg38/hg38.fulltable.no_mRNA_no_lncRNA_piRNAonly.unique_LOC.bed 
+
+cp hg38.fulltable.no_mRNA_no_lncRNA.unique_LOC_pirDB.bed spar_pipeline/annot/hg38/hg38.fulltable.no_mRNA_no_lncRNA.unique_LOC.bed 
+
+```
 
 SPAR pipeline (SPAR.sh script) with 10 processors
 ```
